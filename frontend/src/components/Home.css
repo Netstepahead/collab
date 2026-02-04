@@ -1,0 +1,150 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.home-content {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(68, 114, 196, 0.15);
+}
+
+.home-logo {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f4ff;
+}
+
+.home-logo img {
+  max-width: 200px;
+  height: auto;
+}
+
+.home-content h1 {
+  margin-bottom: 30px;
+  text-align: center;
+  color: #4472C4;
+  font-weight: 600;
+}
+
+.home-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.home-section:last-child {
+  border-bottom: none;
+}
+
+.home-section h2 {
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  color: #555;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group label .required {
+  color: #FF6B35;
+  margin-inline-start: 3px;
+}
+
+.info-text {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9ff;
+  border-radius: 4px;
+  border-left: 3px solid #4472C4;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4472C4 0%, #5a8dd4 100%);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(68, 114, 196, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #355a9d 0%, #4472C4 100%);
+  box-shadow: 0 4px 12px rgba(68, 114, 196, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e55a2b 0%, #FF6B35 100%);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-test {
+  background-color: #888;
+  color: white;
+}
+
+.btn-test:hover:not(:disabled) {
+  background-color: #666;
+}
+
+.error-message {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #fee;
+  color: #c33;
+  border-radius: 4px;
+}
+
+.loading-message {
+  margin-top: 20px;
+  padding: 10px;
+  text-align: center;
+  color: #666;
+}
