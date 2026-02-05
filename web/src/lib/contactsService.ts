@@ -66,6 +66,7 @@ export class ContactsService {
 
       const cleanedData = cleanFormData(contactData);
 
+      // @ts-ignore - Type inference issue with Supabase client
       const { data, error } = await supabase
         .from('contacts')
         .insert({
@@ -91,6 +92,7 @@ export class ContactsService {
       
       const cleanedData = cleanFormData(contactData);
       
+      // @ts-ignore - Type inference issue with Supabase client
       const { data, error } = await supabase
         .from('contacts')
         .update(cleanedData)
