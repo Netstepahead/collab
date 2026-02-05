@@ -4,7 +4,7 @@ import type { Contact, ContactFormData, Interaction } from '@/types/contact';
 
 // Helper function to clean empty strings from form data
 // PostgreSQL doesn't accept empty strings for date fields - they need to be null
-function cleanFormData(data: ContactFormData | Partial<ContactFormData>) {
+function cleanFormData<T extends ContactFormData | Partial<ContactFormData>>(data: T): Partial<ContactFormData> {
   const cleaned: any = { ...data };
   
   // Convert empty strings to undefined so they're not sent to Supabase
@@ -14,7 +14,7 @@ function cleanFormData(data: ContactFormData | Partial<ContactFormData>) {
     }
   });
   
-  return cleaned;
+  return cleaned as Partial<ContactFormData>;
 }
 
 export class ContactsService {
