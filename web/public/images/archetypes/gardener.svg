@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Central node -->
+  <circle cx="150" cy="150" r="30" fill="#4472C4" stroke="#fff" stroke-width="4" />
+  
+  <!-- Connected nodes in clusters -->
+  <g>
+    <line x1="150" y1="150" x2="100" y2="100" stroke="#4caf50" stroke-width="3" />
+    <circle cx="100" cy="100" r="18" fill="#4caf50" stroke="#fff" stroke-width="3" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="200" y2="100" stroke="#4caf50" stroke-width="3" />
+    <circle cx="200" cy="100" r="18" fill="#4caf50" stroke="#fff" stroke-width="3" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="100" y2="200" stroke="#4caf50" stroke-width="3" />
+    <circle cx="100" cy="200" r="18" fill="#4caf50" stroke="#fff" stroke-width="3" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="200" y2="200" stroke="#4caf50" stroke-width="3" />
+    <circle cx="200" cy="200" r="18" fill="#4caf50" stroke="#fff" stroke-width="3" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="150" y2="70" stroke="#4caf50" stroke-width="3" />
+    <circle cx="150" cy="70" r="18" fill="#4caf50" stroke="#fff" stroke-width="3" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="150" y2="230" stroke="#4caf50" stroke-width="3" />
+    <circle cx="150" cy="230" r="18" fill="#4caf50" stroke="#fff" stroke-width="3" />
+  </g>
+  
+  <!-- Secondary connections between nodes -->
+  <line x1="100" y1="100" x2="200" y2="100" stroke="#4caf50" stroke-width="2" opacity="0.4" />
+  <line x1="100" y1="200" x2="200" y2="200" stroke="#4caf50" stroke-width="2" opacity="0.4" />
+  <line x1="100" y1="100" x2="100" y2="200" stroke="#4caf50" stroke-width="2" opacity="0.4" />
+  <line x1="200" y1="100" x2="200" y2="200" stroke="#4caf50" stroke-width="2" opacity="0.4" />
+</svg>
