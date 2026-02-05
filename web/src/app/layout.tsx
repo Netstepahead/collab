@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   description: "Understand your networking style and manage your relationships strategically",
 };
 
+// Force dynamic rendering for all pages
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{
