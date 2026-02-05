@@ -175,7 +175,7 @@ export default function ResultsPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(skillScores).map(([skillId, score]) => {
-                const skillName = skillNames[currentLanguage][parseInt(skillId)];
+                const skillName = (skillNames[currentLanguage] as any)[parseInt(skillId)];
                 const percentage = (score.average / 5) * 100;
                 
                 return (
