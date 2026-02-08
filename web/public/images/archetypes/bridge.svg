@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Left group -->
+  <circle cx="80" cy="100" r="15" fill="#4472C4" stroke="#fff" stroke-width="2" />
+  <circle cx="80" cy="140" r="15" fill="#4472C4" stroke="#fff" stroke-width="2" />
+  <circle cx="80" cy="180" r="15" fill="#4472C4" stroke="#fff" stroke-width="2" />
+  <line x1="80" y1="100" x2="80" y2="180" stroke="#4472C4" stroke-width="2" opacity="0.3" />
+  
+  <!-- Right group -->
+  <circle cx="220" cy="100" r="15" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  <circle cx="220" cy="140" r="15" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  <circle cx="220" cy="180" r="15" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  <line x1="220" y1="100" x2="220" y2="180" stroke="#FF6B35" stroke-width="2" opacity="0.3" />
+  
+  <!-- Bridge node in center -->
+  <circle cx="150" cy="140" r="25" fill="#4472C4" stroke="#fff" stroke-width="4" />
+  
+  <!-- Bridge connections -->
+  <line x1="95" y1="120" x2="150" y2="140" stroke="#4472C4" stroke-width="3" />
+  <line x1="95" y1="140" x2="150" y2="140" stroke="#4472C4" stroke-width="3" />
+  <line x1="95" y1="160" x2="150" y2="140" stroke="#4472C4" stroke-width="3" />
+  
+  <line x1="205" y1="120" x2="150" y2="140" stroke="#FF6B35" stroke-width="3" />
+  <line x1="205" y1="140" x2="150" y2="140" stroke="#FF6B35" stroke-width="3" />
+  <line x1="205" y1="160" x2="150" y2="140" stroke="#FF6B35" stroke-width="3" />
+</svg>

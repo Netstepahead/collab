@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Central node -->
+  <circle cx="150" cy="150" r="25" fill="#FF6B35" stroke="#fff" stroke-width="4" />
+  
+  <!-- Expanding network - multiple layers -->
+  <!-- Inner layer -->
+  <g>
+    <line x1="150" y1="150" x2="120" y2="120" stroke="#FF6B35" stroke-width="2" opacity="0.7" />
+    <circle cx="120" cy="120" r="10" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="180" y2="120" stroke="#FF6B35" stroke-width="2" opacity="0.7" />
+    <circle cx="180" cy="120" r="10" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="120" y2="180" stroke="#FF6B35" stroke-width="2" opacity="0.7" />
+    <circle cx="120" cy="180" r="10" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="180" y2="180" stroke="#FF6B35" stroke-width="2" opacity="0.7" />
+    <circle cx="180" cy="180" r="10" fill="#FF6B35" stroke="#fff" stroke-width="2" />
+  </g>
+  
+  <!-- Middle layer -->
+  <g>
+    <line x1="150" y1="150" x2="90" y2="90" stroke="#FF6B35" stroke-width="1.5" opacity="0.6" />
+    <circle cx="90" cy="90" r="8" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="210" y2="90" stroke="#FF6B35" stroke-width="1.5" opacity="0.6" />
+    <circle cx="210" cy="90" r="8" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="90" y2="210" stroke="#FF6B35" stroke-width="1.5" opacity="0.6" />
+    <circle cx="90" cy="210" r="8" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="210" y2="210" stroke="#FF6B35" stroke-width="1.5" opacity="0.6" />
+    <circle cx="210" cy="210" r="8" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  
+  <!-- Outer layer -->
+  <g>
+    <line x1="150" y1="150" x2="60" y2="150" stroke="#FF6B35" stroke-width="1.5" opacity="0.5" />
+    <circle cx="60" cy="150" r="7" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="240" y2="150" stroke="#FF6B35" stroke-width="1.5" opacity="0.5" />
+    <circle cx="240" cy="150" r="7" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="150" y2="60" stroke="#FF6B35" stroke-width="1.5" opacity="0.5" />
+    <circle cx="150" cy="60" r="7" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+  <g>
+    <line x1="150" y1="150" x2="150" y2="240" stroke="#FF6B35" stroke-width="1.5" opacity="0.5" />
+    <circle cx="150" cy="240" r="7" fill="#FF6B35" stroke="#fff" stroke-width="1.5" />
+  </g>
+</svg>
