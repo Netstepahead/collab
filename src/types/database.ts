@@ -89,6 +89,7 @@ export interface Database {
           notes: string | null
           tags: string[] | null
           common_ground: string | null
+          avatar_url: string | null
         }
         Insert: {
           id?: string
@@ -106,6 +107,7 @@ export interface Database {
           notes?: string | null
           tags?: string[] | null
           common_ground?: string | null
+          avatar_url?: string | null
         }
         Update: {
           id?: string
@@ -123,6 +125,7 @@ export interface Database {
           notes?: string | null
           tags?: string[] | null
           common_ground?: string | null
+          avatar_url?: string | null
         }
       }
       interactions: {

@@ -44,8 +44,26 @@ function ContactNode({ data }: NodeProps<CustomNodeData>) {
   return (
     <div className="contact-node">
       <Handle type="target" position={Position.Top} />
+      {contact.avatar_url ? (
+        <img
+          src={contact.avatar_url}
+          alt={contact.full_name}
+          className="rounded-full object-cover shadow-md border-2 border-white/80 transition-all duration-200"
+          style={{
+            width: `${nodeSize}px`,
+            height: `${nodeSize}px`,
+          }}
+          onError={(e) => {
+            // Fallback to initial if image fails to load
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const fallback = target.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'flex';
+          }}
+        />
+      ) : null}
       <div
-        className="rounded-full flex items-center justify-center text-white font-medium shadow-md border-2 border-white/80 transition-all duration-200"
+        className={`rounded-full flex items-center justify-center text-white font-medium shadow-md border-2 border-white/80 transition-all duration-200 ${contact.avatar_url ? 'hidden' : ''}`}
         style={{
           width: `${nodeSize}px`,
           height: `${nodeSize}px`,

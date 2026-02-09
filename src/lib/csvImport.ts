@@ -116,6 +116,9 @@ export function mapColumnsToContacts(
         if (strength >= 1 && strength <= 5) {
           contact.connection_strength = strength;
         }
+      } else {
+        // Default strength to 3 (medium) if not provided
+        contact.connection_strength = 3;
       }
 
       if (mapping.common_ground && row[mapping.common_ground]) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ContactFormData, Contact } from '@/types/contact';
+import { StorageService } from '@/lib/storageService';
+import { Camera, X } from 'lucide-react';
 
 interface ContactFormProps {
   contact?: Contact | null;
-  onSubmit: (data: ContactFormData) => Promise<void>;
+  onSubmit: (data: ContactFormData, avatarFile?: File | null) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -32,22 +34,142 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
     notes: contact?.notes || '',
     tags: contact?.tags || [],
     common_ground: contact?.common_ground || '',
+    avatar_url: contact?.avatar_url || undefined,
   });
 
   const [formData, setFormData] = useState<ContactFormData>(getInitialFormData());
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(contact?.avatar_url || null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset form when contact changes (switching between add/edit modes)
   useEffect(() => {
-    setFormData(getInitialFormData());
+    const initialData = getInitialFormData();
+    setFormData(initialData);
+    setAvatarPreview(contact?.avatar_url || null);
+    setAvatarFile(null);
   }, [contact?.id]); // Reset when contact ID changes (or becomes undefined for new contact)
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert(i18n.language === 'he' ? 'אנא בחר קובץ תמונה' : 'Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert(i18n.language === 'he' ? 'קובץ גדול מדי. מקסימום 5MB' : 'File too large. Maximum 5MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    try {
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Store file for upload (will be uploaded after contact creation/update)
+      setAvatarFile(file);
+      
+      // If editing existing contact, upload immediately
+      if (contact?.id) {
+        setUploadingAvatar(true);
+        const { url, error } = await StorageService.uploadContactAvatar(file, contact.id);
+        if (error) {
+          console.error('Error uploading avatar:', error);
+          alert(i18n.language === 'he' ? 'שגיאה בהעלאת תמונה' : 'Error uploading image');
+          setAvatarFile(null);
+          setAvatarPreview(contact.avatar_url || null);
+        } else if (url) {
+          setFormData({ ...formData, avatar_url: url });
+        }
+        setUploadingAvatar(false);
+      }
+    } catch (error) {
+      console.error('Error handling avatar:', error);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarPreview(null);
+    setAvatarFile(null);
+    setFormData({ ...formData, avatar_url: undefined });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
+    await onSubmit(formData, avatarFile);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Avatar Upload */}
+      <div className="space-y-2">
+        <Label>{i18n.language === 'he' ? 'תמונת פרופיל' : 'Profile Picture'}</Label>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            {avatarPreview ? (
+              <div className="relative">
+                <img
+                  src={avatarPreview}
+                  alt="Avatar preview"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-[#1B365D]/20"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-[#1B365D]/10 border-2 border-dashed border-[#1B365D]/30 flex items-center justify-center">
+                <Camera className="w-8 h-8 text-[#1B365D]/40" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+              id="avatar-upload"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
+            >
+              {uploadingAvatar
+                ? (i18n.language === 'he' ? 'מעלה...' : 'Uploading...')
+                : (i18n.language === 'he' ? 'העלה תמונה' : 'Upload Image')}
+            </Button>
+            <p className="text-xs text-gray-500 mt-1">
+              {i18n.language === 'he' ? 'JPG, PNG או GIF. מקסימום 5MB' : 'JPG, PNG or GIF. Max 5MB'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="full_name">
           {i18n.language === 'he' ? 'שם מלא' : 'Full Name'} *

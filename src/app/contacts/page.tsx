@@ -12,6 +12,7 @@ import { ContactForm } from '@/components/contacts/ContactForm';
 import { ImportDialog } from '@/components/contacts/ImportDialog';
 import { useAuthStore } from '@/stores/authStore';
 import { ContactsService } from '@/lib/contactsService';
+import { StorageService } from '@/lib/storageService';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type { Contact, ContactFormData } from '@/types/contact';
 import { Upload } from 'lucide-react';
@@ -76,17 +77,41 @@ export default function ContactsPage() {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = async (formData: ContactFormData) => {
+  const handleSubmit = async (formData: ContactFormData, avatarFile?: File | null) => {
     setIsSubmitting(true);
     setError('');
 
     try {
+      let contactId: string;
+      
       if (editingContact) {
+        // Update existing contact
         const { error } = await ContactsService.updateContact(editingContact.id, formData);
         if (error) throw error;
+        contactId = editingContact.id;
       } else {
-        const { error } = await ContactsService.createContact(formData);
+        // Create new contact first (without avatar_url if it's just a filename marker)
+        const dataToSave = { ...formData };
+        if (dataToSave.avatar_url && !dataToSave.avatar_url.startsWith('http')) {
+          delete dataToSave.avatar_url; // Remove temporary marker
+        }
+        
+        const { data, error } = await ContactsService.createContact(dataToSave);
         if (error) throw error;
+        if (!data) throw new Error('Failed to create contact');
+        contactId = data.id;
+      }
+
+      // Upload avatar if file was selected (for new contacts or when updating)
+      if (avatarFile && contactId) {
+        const { url, error: uploadError } = await StorageService.uploadContactAvatar(avatarFile, contactId);
+        if (uploadError) {
+          console.error('Error uploading avatar:', uploadError);
+          // Don't fail the whole operation if avatar upload fails
+        } else if (url) {
+          // Update contact with avatar URL
+          await ContactsService.updateContact(contactId, { avatar_url: url });
+        }
       }
 
       await loadContacts();
@@ -96,6 +121,19 @@ export default function ContactsPage() {
       setError(err.message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleQuickStrengthUpdate = async (contactId: string, strength: number) => {
+    try {
+      const { error } = await ContactsService.updateContact(contactId, { connection_strength: strength });
+      if (error) {
+        setError(error.message);
+      } else {
+        await loadContacts();
+      }
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -268,32 +306,70 @@ export default function ContactsPage() {
               {filteredContacts.map((contact) => (
                 <Card key={contact.id} className="hover:shadow-card transition-smooth border-[#1B365D]/10 bg-white/80 backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="text-lg font-serif text-[#1B365D]">{contact.full_name}</CardTitle>
-                    {contact.company && (
-                      <CardDescription className="text-gray-600">{contact.company}</CardDescription>
-                    )}
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0">
+                        {contact.avatar_url ? (
+                          <img
+                            src={contact.avatar_url}
+                            alt={contact.full_name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-[#1B365D]/20"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-12 h-12 rounded-full bg-[#1B365D]/10 border-2 border-[#1B365D]/20 flex items-center justify-center ${contact.avatar_url ? 'hidden' : ''}`}>
+                          <span className="text-[#1B365D] font-semibold text-lg">
+                            {contact.full_name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg font-serif text-[#1B365D] truncate">{contact.full_name}</CardTitle>
+                        {contact.company && (
+                          <CardDescription className="text-gray-600 truncate">{contact.company}</CardDescription>
+                        )}
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-3">
                     {contact.job_title && (
                       <p className="text-sm text-gray-600 font-light">{contact.job_title}</p>
                     )}
                     {contact.email && (
-                      <p className="text-sm text-[#1B365D]">{contact.email}</p>
+                      <p className="text-sm text-[#1B365D] truncate">{contact.email}</p>
                     )}
-                    {contact.connection_strength && (
-                      <div className="flex items-center text-sm">
-                        <span className="mr-2 text-gray-600 font-light">
+                    {/* Quick Strength Update */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 font-light">
                           {i18n.language === 'he' ? 'עוצמה:' : 'Strength:'}
                         </span>
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <span key={i} className={i <= contact.connection_strength! ? 'text-[#E87722]' : 'text-gray-300'}>
-                              ★
-                            </span>
-                          ))}
-                        </div>
+                        <span className="text-xs text-gray-500">
+                          {contact.connection_strength || '—'}
+                        </span>
                       </div>
-                    )}
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => handleQuickStrengthUpdate(contact.id, i)}
+                            className={`transition-all duration-200 ${
+                              i <= (contact.connection_strength || 0)
+                                ? 'text-[#E87722] scale-110'
+                                : 'text-gray-300 hover:text-gray-400'
+                            }`}
+                            title={`${i18n.language === 'he' ? 'לחץ לעדכון' : 'Click to update'} ${i}`}
+                          >
+                            <span className="text-lg">★</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <div className="flex gap-2 pt-2">
                       <Button
                         variant="outline"

@@ -16,6 +16,7 @@ export interface Contact {
   notes?: string | null;
   tags?: string[] | null;
   common_ground?: string | null;
+  avatar_url?: string | null;
 }
 
 export interface ContactFormData {
@@ -30,6 +31,7 @@ export interface ContactFormData {
   notes?: string;
   tags?: string[];
   common_ground?: string;
+  avatar_url?: string;
 }
 
 export interface Interaction {
