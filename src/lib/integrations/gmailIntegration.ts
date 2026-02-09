@@ -1,8 +1,8 @@
 // Gmail Integration Service
 import { google } from 'googleapis';
 import { supabase, isSupabaseConfigured } from '../supabase';
-import { InteractionsService } from '../interactionsService';
-import type { Contact } from '@/types/contact';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
 
 interface GmailMessage {
   id: string;
@@ -156,18 +156,30 @@ export class GmailIntegration {
           const headers = fullMessage.data.payload?.headers || [];
           const fromHeader = headers.find(h => h.name === 'From');
           const toHeader = headers.find(h => h.name === 'To');
+          const ccHeader = headers.find(h => h.name === 'Cc');
           const subjectHeader = headers.find(h => h.name === 'Subject');
           const dateHeader = headers.find(h => h.name === 'Date');
 
-          if (fromHeader && toHeader) {
-            emailMetadata.push({
-              from: this.extractEmail(fromHeader.value),
-              to: this.extractEmails(toHeader.value),
-              subject: subjectHeader?.value || '',
-              date: dateHeader?.value ? new Date(dateHeader.value) : new Date(parseInt(fullMessage.data.internalDate || '0')),
-              messageId: message.id!,
-              snippet: fullMessage.data.snippet || '',
-            });
+          if (fromHeader) {
+            const fromEmail = this.extractEmail(fromHeader.value);
+            const toEmails = toHeader ? this.extractEmails(toHeader.value) : [];
+            const ccEmails = ccHeader ? this.extractEmails(ccHeader.value) : [];
+            const allRecipients = [...toEmails, ...ccEmails];
+
+            console.log(`[Gmail Sync] Email ${message.id}: FROM=${fromEmail}, TO=[${toEmails.join(', ')}], CC=[${ccEmails.join(', ')}]`);
+
+            if (fromEmail && allRecipients.length > 0) {
+              emailMetadata.push({
+                from: fromEmail,
+                to: allRecipients,
+                subject: subjectHeader?.value || '',
+                date: dateHeader?.value ? new Date(dateHeader.value) : new Date(parseInt(fullMessage.data.internalDate || '0')),
+                messageId: message.id!,
+                snippet: fullMessage.data.snippet || '',
+              });
+            } else {
+              console.log(`[Gmail Sync] Skipping email ${message.id} - missing from or recipients`);
+            }
           }
         } catch (error) {
           console.error(`Error fetching message ${message.id}:`, error);
@@ -199,18 +211,24 @@ export class GmailIntegration {
     return matches ? matches.map(email => email.toLowerCase()) : [];
   }
 
-  // Match email to contact
-  static async matchEmailToContact(email: string, userId: string): Promise<string | null> {
+  // Match email to contact (use authClient when called from API route for RLS)
+  static async matchEmailToContact(
+    email: string,
+    userId: string,
+    authClient?: SupabaseClient<Database>
+  ): Promise<string | null> {
     if (!isSupabaseConfigured()) {
       return null;
     }
+
+    const client = authClient ?? supabase;
 
     try {
       const normalizedEmail = email.toLowerCase().trim();
       console.log(`[Gmail Sync] Matching email: ${normalizedEmail}`);
 
       // Get all contacts with emails for this user
-      const { data: contacts, error: contactsError } = await supabase
+      const { data: contacts, error: contactsError } = await client
         .from('contacts')
         .select('id, email')
         .eq('user_id', userId)
@@ -227,11 +245,13 @@ export class GmailIntegration {
       }
 
       console.log(`[Gmail Sync] Checking against ${contacts.length} contacts with emails`);
+      console.log(`[Gmail Sync] Contact emails: [${contacts.map(c => c.email?.toLowerCase().trim()).filter(Boolean).join(', ')}]`);
 
       // Try exact match first (case-insensitive, trimmed)
       for (const contact of contacts) {
         if (contact.email) {
           const contactEmail = contact.email.toLowerCase().trim();
+          console.log(`[Gmail Sync] Comparing: "${normalizedEmail}" === "${contactEmail}"? ${normalizedEmail === contactEmail}`);
           if (contactEmail === normalizedEmail) {
             console.log(`[Gmail Sync] ✓ Exact match found: ${contactEmail} -> contact ${contact.id}`);
             return contact.id;
@@ -262,12 +282,18 @@ export class GmailIntegration {
     }
   }
 
-  // Sync emails and create interactions
-  async syncEmails(userId: string, lastSyncAt?: Date): Promise<{ synced: number; errors: number; totalEmails: number; matchedContacts: number; skippedNoContact: number }> {
+  // Sync emails and create interactions (authClient required when called from API route for RLS)
+  async syncEmails(
+    userId: string,
+    lastSyncAt?: Date,
+    authClient?: SupabaseClient<Database>
+  ): Promise<{ synced: number; errors: number; totalEmails: number; matchedContacts: number; skippedNoContact: number }> {
     let synced = 0;
     let errors = 0;
     let matchedContacts = 0;
     let skippedNoContact = 0;
+
+    const client = authClient ?? supabase;
 
     try {
       // Fetch emails since last sync (or last 30 days if first sync)
@@ -284,8 +310,6 @@ export class GmailIntegration {
       for (const email of emails) {
         try {
           // Determine if this is a sent or received email
-          // If user's email is in "from", it's a sent email
-          // If user's email is in "to", it's a received email
           const isSent = email.from.toLowerCase() === userEmail.toLowerCase();
           const otherPartyEmail = isSent 
             ? email.to.find(e => e.toLowerCase() !== userEmail.toLowerCase()) || email.to[0]
@@ -293,11 +317,10 @@ export class GmailIntegration {
           
           console.log(`[Gmail Sync] Processing email: ${isSent ? 'SENT' : 'RECEIVED'} from/to ${otherPartyEmail}`);
 
-          // Match to contact
-          const contactId = await GmailIntegration.matchEmailToContact(otherPartyEmail, userId);
+          // Match to contact (pass auth client so RLS allows reading contacts)
+          const contactId = await GmailIntegration.matchEmailToContact(otherPartyEmail, userId, client);
           
           if (!contactId) {
-            // Skip if no matching contact found
             skippedNoContact++;
             console.log(`[Gmail Sync] Skipped email from ${otherPartyEmail} - no matching contact`);
             continue;
@@ -306,36 +329,41 @@ export class GmailIntegration {
           matchedContacts++;
 
           // Check if interaction already exists for this email
-          const { data: existingSource } = await supabase
+          const { data: existingSource } = await client
             .from('interaction_sources')
             .select('interaction_id')
             .eq('source_type', 'gmail')
             .eq('source_id', email.messageId)
             .limit(1)
-            .single();
+            .maybeSingle();
 
           if (existingSource) {
-            // Already synced, skip
             continue;
           }
 
-          // Create interaction
-          const { data: interaction, error } = await InteractionsService.createInteraction(
-            contactId,
-            {
-              interaction_date: email.date.toISOString().split('T')[0],
-              interaction_type: 'email',
-              notes: `Subject: ${email.subject}\n\n${email.snippet}`,
-            }
-          );
+          // Create interaction (use client so RLS allows insert)
+          const interactionDate = email.date.toISOString().split('T')[0];
+          const notes = `Subject: ${email.subject}\n\n${email.snippet}`;
 
-          if (error || !interaction) {
+          const { data: interaction, error: insertError } = await client
+            .from('interactions')
+            .insert({
+              user_id: userId,
+              contact_id: contactId,
+              interaction_date: interactionDate,
+              interaction_type: 'email',
+              notes,
+            })
+            .select()
+            .single();
+
+          if (insertError || !interaction) {
+            console.error(`[Gmail Sync] Failed to create interaction:`, insertError);
             errors++;
             continue;
           }
 
-          // Create interaction source record
-          await supabase
+          await client
             .from('interaction_sources')
             .insert({
               interaction_id: interaction.id,
