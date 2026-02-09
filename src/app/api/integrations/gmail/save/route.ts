@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save integration
+    // Save integration - pass user ID since we're in an API route
     const { data: integration, error } = await IntegrationsService.upsertIntegration('gmail', {
       access_token: accessToken,
       refresh_token: refreshToken || null,
       expires_at: expiresAt || null,
       enabled: true,
-    });
+    }, user.id);
 
     if (error) {
       return NextResponse.json(

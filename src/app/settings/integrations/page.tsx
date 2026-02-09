@@ -205,11 +205,27 @@ export default function IntegrationsPage() {
         return;
       }
 
-      // Get Supabase session token
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Get Supabase session token - try multiple methods
+      let sessionToken: string | null = null;
       
-      if (sessionError || !session) {
-        setError(i18n.language === 'he' ? 'לא ניתן לקבל אסימון אימות' : 'Failed to get authentication token');
+      // Method 1: Try getSession()
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (session && !sessionError) {
+        sessionToken = session.access_token;
+      } else {
+        // Method 2: Try getUser() which should use current session
+        const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+        if (currentUser && !userError) {
+          // If getUser works, try getSession again (might need a refresh)
+          const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+          if (refreshedSession) {
+            sessionToken = refreshedSession.access_token;
+          }
+        }
+      }
+      
+      if (!sessionToken) {
+        setError(i18n.language === 'he' ? 'לא ניתן לקבל אסימון אימות. אנא התחבר מחדש.' : 'Failed to get authentication token. Please sign in again.');
         return;
       }
 
@@ -217,7 +233,7 @@ export default function IntegrationsPage() {
       const saveResponse = await fetch('/api/integrations/gmail/save', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${sessionToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

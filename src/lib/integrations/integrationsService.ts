@@ -61,23 +61,33 @@ export class IntegrationsService {
   // Create or update integration
   static async upsertIntegration(
     provider: string,
-    integrationData: Omit<IntegrationInsert, 'id' | 'user_id' | 'provider' | 'created_at' | 'updated_at'>
+    integrationData: Omit<IntegrationInsert, 'id' | 'user_id' | 'provider' | 'created_at' | 'updated_at'>,
+    userId?: string // Optional: pass user ID when called from API routes
   ): Promise<{ data: Integration | null; error: Error | null }> {
     try {
       if (!isSupabaseConfigured()) {
         throw new Error('Supabase not configured');
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
+      let finalUserId: string;
+      
+      if (userId) {
+        // Use provided user ID (from API route)
+        finalUserId = userId;
+      } else {
+        // Get user ID from current session (client-side)
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+        finalUserId = user.id;
       }
 
       // @ts-ignore - Supabase type inference issue
       const { data, error } = await supabase
         .from('integrations')
         .upsert({
-          user_id: user.id,
+          user_id: finalUserId,
           provider,
           ...integrationData,
           updated_at: new Date().toISOString(),
