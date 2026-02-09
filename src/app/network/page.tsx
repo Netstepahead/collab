@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Header } from '@/components/layout/Header';
 import { NetworkGraph } from '@/components/network/NetworkGraph';
 import { ContactsService } from '@/lib/contactsService';
+import { ProfileService } from '@/lib/profileService';
 import { useAuthStore } from '@/stores/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type { Contact } from '@/types/contact';
@@ -18,6 +19,8 @@ export default function NetworkPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const { user, loading: authLoading } = useAuthStore();
 
   useEffect(() => {
@@ -38,8 +41,17 @@ export default function NetworkPage() {
   useEffect(() => {
     if (user && isSupabaseConfigured()) {
       loadContacts();
+      loadUserProfile();
     }
   }, [user]);
+
+  const loadUserProfile = async () => {
+    const { profile, error: profileError } = await ProfileService.getProfile();
+    if (!profileError && profile) {
+      setUserAvatarUrl(profile.avatar_url);
+      setUserName(profile.full_name);
+    }
+  };
 
   const loadContacts = async () => {
     setLoading(true);
@@ -129,7 +141,7 @@ export default function NetworkPage() {
               </button>
             </div>
           ) : (
-            <NetworkGraph contacts={contacts} />
+            <NetworkGraph contacts={contacts} userAvatarUrl={userAvatarUrl} userName={userName} />
           )}
         </div>
       </div>

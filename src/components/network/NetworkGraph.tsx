@@ -19,6 +19,8 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface NetworkGraphProps {
   contacts: Contact[];
+  userAvatarUrl?: string | null;
+  userName?: string | null;
 }
 
 interface CustomNodeData {
@@ -89,12 +91,33 @@ function ContactNode({ data }: NodeProps<CustomNodeData>) {
 }
 
 // Center Node (User)
-function CenterNode({ data }: NodeProps) {
+function CenterNode({ data }: NodeProps<{ avatarUrl?: string | null; userName?: string | null }>) {
+  const { avatarUrl, userName } = data || {};
+  
   return (
     <div className="center-node">
       <Handle type="target" position={Position.Top} />
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt={userName || 'You'}
+          className="rounded-full object-cover shadow-lg border-3 border-[#E87722]/80 transition-all duration-200"
+          style={{
+            width: '90px',
+            height: '90px',
+            borderWidth: '3px',
+          }}
+          onError={(e) => {
+            // Fallback to initial if image fails to load
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const fallback = target.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'flex';
+          }}
+        />
+      ) : null}
       <div
-        className="rounded-full flex items-center justify-center text-white font-semibold shadow-lg border-3 border-[#E87722]/80 transition-all duration-200"
+        className={`rounded-full flex items-center justify-center text-white font-semibold shadow-lg border-3 border-[#E87722]/80 transition-all duration-200 ${avatarUrl ? 'hidden' : ''}`}
         style={{
           width: '90px',
           height: '90px',
@@ -103,7 +126,7 @@ function CenterNode({ data }: NodeProps) {
           borderWidth: '3px',
         }}
       >
-        You
+        {userName ? userName.charAt(0).toUpperCase() : 'You'}
       </div>
       <Handle type="source" position={Position.Bottom} />
     </div>
@@ -115,7 +138,7 @@ const nodeTypes: NodeTypes = {
   center: CenterNode,
 };
 
-export function NetworkGraph({ contacts }: NetworkGraphProps) {
+export function NetworkGraph({ contacts, userAvatarUrl, userName }: NetworkGraphProps) {
   const { i18n } = useTranslation();
   
   // Create nodes and edges
@@ -124,7 +147,11 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
       id: 'center',
       type: 'center',
       position: { x: 0, y: 0 },
-      data: { label: 'You' },
+      data: { 
+        label: 'You',
+        avatarUrl: userAvatarUrl,
+        userName: userName,
+      },
     };
 
     // Calculate positions in a circle around center - more spacing for cleaner look
@@ -187,7 +214,7 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
       nodes: [centerNode, ...contactNodes],
       edges: contactEdges,
     };
-  }, [contacts]);
+  }, [contacts, userAvatarUrl, userName]);
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     // Could open a modal or navigate to contact detail page

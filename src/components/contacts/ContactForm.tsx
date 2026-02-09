@@ -195,6 +195,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
           onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
           required
           placeholder={i18n.language === 'he' ? 'הזן שם מלא' : 'Enter full name'}
+          className="bg-white"
         />
       </div>
 
@@ -209,6 +210,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder={i18n.language === 'he' ? 'הזן אימייל' : 'Enter email'}
+            className="bg-white"
           />
         </div>
 
@@ -222,6 +224,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder={i18n.language === 'he' ? 'הזן טלפון' : 'Enter phone'}
+            className="bg-white"
           />
         </div>
       </div>
@@ -236,6 +239,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
             value={formData.company}
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
             placeholder={i18n.language === 'he' ? 'הזן חברה' : 'Enter company'}
+            className="bg-white"
           />
         </div>
 
@@ -248,6 +252,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
             value={formData.job_title}
             onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
             placeholder={i18n.language === 'he' ? 'הזן תפקיד' : 'Enter job title'}
+            className="bg-white"
           />
         </div>
       </div>
@@ -261,7 +266,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
             value={formData.relationship_type}
             onValueChange={(value: any) => setFormData({ ...formData, relationship_type: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white">
               <SelectValue placeholder={i18n.language === 'he' ? 'בחר סוג קשר' : 'Select type'} />
             </SelectTrigger>
             <SelectContent>
@@ -289,7 +294,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
             value={formData.connection_strength?.toString()}
             onValueChange={(value) => setFormData({ ...formData, connection_strength: parseInt(value) })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white">
               <SelectValue placeholder={i18n.language === 'he' ? 'בחר עוצמה' : 'Select strength'} />
             </SelectTrigger>
             <SelectContent>
@@ -314,6 +319,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
           value={formData.common_ground}
           onChange={(e) => setFormData({ ...formData, common_ground: e.target.value })}
           placeholder={i18n.language === 'he' ? 'למשל: אוניברסיטה, תחביבים משותפים' : 'e.g., University, shared hobbies'}
+          className="bg-white"
         />
       </div>
 
@@ -327,6 +333,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           placeholder={i18n.language === 'he' ? 'הערות נוספות' : 'Additional notes'}
           rows={3}
+          className="bg-white"
         />
       </div>
 
