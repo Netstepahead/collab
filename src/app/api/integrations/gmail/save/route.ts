@@ -37,16 +37,10 @@ export async function POST(request: NextRequest) {
     // Get user from token first
     const token = authHeader.replace('Bearer ', '');
     
-    // Create Supabase client with user's access token for RLS
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    });
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
     
-    // Verify user
+    // Verify user and set session for RLS
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
@@ -55,6 +49,13 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Set the session so RLS policies can access auth.uid()
+    // We need to create a session object with the access token
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: '', // Not needed for this operation
+    });
 
     // Save integration using the authenticated Supabase client
     // This ensures RLS policies work correctly
