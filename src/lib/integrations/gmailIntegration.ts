@@ -71,11 +71,15 @@ export class GmailIntegration {
 
   // Exchange authorization code for tokens
   static async getTokens(code: string): Promise<{ accessToken: string; refreshToken: string | null; expiresAt: Date | null }> {
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/integrations/gmail/callback`;
+    
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/integrations/gmail/callback`
+      redirectUri
     );
+
+    console.log('Exchanging token with redirect URI:', redirectUri);
 
     const { tokens } = await oauth2Client.getToken(code);
     
