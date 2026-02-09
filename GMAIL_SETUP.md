@@ -24,16 +24,26 @@ Think of it this way:
 
 ## Step 1: Create Google Cloud Project
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - **Note**: You can use your Google Workspace account to sign in, but you're creating a Cloud Project
-   - The Cloud Project is separate from your Workspace organization
-2. Create a new project or select an existing one
-   - Project name: "Step Ahead CRM" (or similar)
-   - Organization: Select your Google Workspace organization (if available)
-3. Enable the **Gmail API**:
-   - Navigate to "APIs & Services" > "Library"
-   - Search for "Gmail API"
-   - Click "Enable"
+### Quick Method (From Header)
+1. In Google Cloud Console, click the **"My First Project"** button (or project dropdown) in the top header
+2. Click **"NEW PROJECT"** at the top of the dropdown
+3. Fill in:
+   - **Project name**: "Step Ahead CRM" (or similar)
+   - **Organization**: Select your Google Workspace organization (if available)
+   - **Location**: Leave as default
+4. Click **"CREATE"**
+5. Wait a few seconds, then select your new project from the dropdown
+
+### Alternative Method
+- Go directly to: https://console.cloud.google.com/projectcreate
+- Or navigate: Click project dropdown > "NEW PROJECT"
+
+### Enable Gmail API
+Once your project is created and selected:
+1. Go to: https://console.cloud.google.com/apis/library/gmail.googleapis.com
+   - Or navigate: "APIs & Services" > "Library" > Search "Gmail API"
+2. Click **"Enable"**
+3. Wait for it to finish enabling (usually takes a few seconds)
 
 ## Step 2: Configure OAuth Consent Screen
 
