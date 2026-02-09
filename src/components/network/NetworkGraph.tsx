@@ -34,23 +34,23 @@ function ContactNode({ data }: NodeProps<CustomNodeData>) {
   // Calculate node size based on connection strength (1-5)
   const nodeSize = 40 + (strength * 8); // 48px to 80px
   
-  // Color based on strength (lighter navy for weak, darker for strong)
+  // Softer, gentler colors with subtle transparency
   const nodeColor = strength >= 4 
-    ? '#1B365D' // Strong - dark navy
+    ? 'rgba(27, 54, 93, 0.9)' // Strong - navy with slight transparency
     : strength >= 3
-    ? '#2a4d80' // Medium-strong - medium navy
-    : '#4a6fa5'; // Weak - lighter navy
+    ? 'rgba(42, 77, 128, 0.85)' // Medium - medium navy
+    : 'rgba(74, 111, 165, 0.8)'; // Weak - lighter navy
 
   return (
     <div className="contact-node">
       <Handle type="target" position={Position.Top} />
       <div
-        className="rounded-full flex items-center justify-center text-white font-semibold shadow-lg border-2 border-white"
+        className="rounded-full flex items-center justify-center text-white font-medium shadow-md border-2 border-white/80 transition-all duration-200"
         style={{
           width: `${nodeSize}px`,
           height: `${nodeSize}px`,
           backgroundColor: nodeColor,
-          fontSize: nodeSize < 50 ? '12px' : '14px',
+          fontSize: nodeSize < 50 ? '11px' : '13px',
         }}
       >
         {contact.full_name.charAt(0).toUpperCase()}
@@ -76,12 +76,13 @@ function CenterNode({ data }: NodeProps) {
     <div className="center-node">
       <Handle type="target" position={Position.Top} />
       <div
-        className="rounded-full flex items-center justify-center text-white font-bold shadow-xl border-4 border-[#E87722]"
+        className="rounded-full flex items-center justify-center text-white font-semibold shadow-lg border-3 border-[#E87722]/80 transition-all duration-200"
         style={{
-          width: '100px',
-          height: '100px',
-          backgroundColor: '#1B365D',
-          fontSize: '24px',
+          width: '90px',
+          height: '90px',
+          backgroundColor: 'rgba(27, 54, 93, 0.95)',
+          fontSize: '20px',
+          borderWidth: '3px',
         }}
       >
         You
@@ -108,8 +109,8 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
       data: { label: 'You' },
     };
 
-    // Calculate positions in a circle around center
-    const radius = 200;
+    // Calculate positions in a circle around center - more spacing for cleaner look
+    const radius = contacts.length > 10 ? 250 : 220; // More space for larger networks
     const angleStep = (2 * Math.PI) / contacts.length;
 
     const contactNodes: Node[] = contacts.map((contact, index) => {
@@ -132,18 +133,17 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
     const contactEdges: Edge[] = contacts.map((contact) => {
       const strength = contact.connection_strength || 1;
       
-      // Edge thickness based on strength (1-5)
-      const strokeWidth = 1.5 + (strength * 0.7); // 2.2px to 5px
+      // Thinner, gentler edges - reduced thickness
+      const strokeWidth = 0.8 + (strength * 0.4); // 1.2px to 2.8px (much thinner)
       
-      // Edge color based on strength
+      // Softer, gentler colors with reduced opacity
       const strokeColor = strength >= 4
-        ? '#1B365D' // Strong (4-5) - dark navy
+        ? 'rgba(27, 54, 93, 0.6)' // Strong (4-5) - navy with transparency
         : strength >= 3
-        ? '#2a4d80' // Medium (3) - medium navy
-        : '#9bb5d1'; // Weak (1-2) - light navy
+        ? 'rgba(42, 77, 128, 0.5)' // Medium (3) - medium navy with transparency
+        : 'rgba(155, 181, 209, 0.4)'; // Weak (1-2) - light navy with transparency
 
-      // For strong connections, use animated dashed line to show active/strong relationship
-      // For medium/weak, use solid lines
+      // For strong connections, use subtle animated dashed line
       const isStrong = strength >= 4;
 
       return {
@@ -153,12 +153,14 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
         style: {
           stroke: strokeColor,
           strokeWidth,
-          strokeDasharray: isStrong ? '5,5' : '0', // Dashed for strong, solid for others
+          strokeDasharray: isStrong ? '8,4' : '0', // Longer dashes for gentler look
         },
-        animated: isStrong, // Animated flow effect for strong connections (4-5)
+        animated: isStrong, // Subtle animation for strong connections
         markerEnd: {
           type: 'arrowclosed',
           color: strokeColor,
+          width: 15,
+          height: 15,
         },
       };
     });
@@ -184,29 +186,43 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
             nodeTypes={nodeTypes}
             onNodeClick={onNodeClick}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.3 }}
             minZoom={0.3}
             maxZoom={2}
+            defaultEdgeOptions={{
+              style: { strokeWidth: 1.5 },
+            }}
           >
-            <Background color="#f0f0f0" gap={16} />
+            <Background 
+              color="#f5f5f5" 
+              gap={20}
+              size={1}
+              variant="dots"
+            />
             <Controls 
               style={{
                 button: {
-                  backgroundColor: '#1B365D',
+                  backgroundColor: 'rgba(27, 54, 93, 0.9)',
                   color: 'white',
                   border: 'none',
+                  borderRadius: '6px',
                 },
               }}
             />
             <MiniMap
               nodeColor={(node) => {
-                if (node.type === 'center') return '#1B365D';
+                if (node.type === 'center') return 'rgba(27, 54, 93, 0.8)';
                 const strength = (node.data as CustomNodeData).contact?.connection_strength || 1;
-                return strength >= 4 ? '#1B365D' : strength >= 3 ? '#2a4d80' : '#4a6fa5';
+                return strength >= 4 
+                  ? 'rgba(27, 54, 93, 0.7)' 
+                  : strength >= 3 
+                  ? 'rgba(42, 77, 128, 0.6)' 
+                  : 'rgba(74, 111, 165, 0.5)';
               }}
-              maskColor="rgba(27, 54, 93, 0.1)"
+              maskColor="rgba(27, 54, 93, 0.08)"
               style={{
                 backgroundColor: '#FAF9F6',
+                border: '1px solid rgba(27, 54, 93, 0.1)',
               }}
             />
           </ReactFlow>
@@ -248,13 +264,13 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
                     y1="1" 
                     x2="40" 
                     y2="1" 
-                    stroke="#1B365D" 
-                    strokeWidth="3" 
-                    strokeDasharray="5,5"
+                    stroke="rgba(27, 54, 93, 0.6)" 
+                    strokeWidth="2" 
+                    strokeDasharray="8,4"
                     className="animate-pulse"
                   />
                 </svg>
-                <span className="text-gray-600 text-xs">
+                <span className="text-gray-600 text-xs font-light">
                   {i18n.language === 'he' 
                     ? 'קו מקווקו מונפש = קשר חזק (4-5)' 
                     : 'Animated dashed line = Strong connection (4-5)'}
@@ -267,11 +283,11 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
                     y1="1" 
                     x2="40" 
                     y2="1" 
-                    stroke="#2a4d80" 
-                    strokeWidth="2.5"
+                    stroke="rgba(42, 77, 128, 0.5)" 
+                    strokeWidth="1.8"
                   />
                 </svg>
-                <span className="text-gray-600 text-xs">
+                <span className="text-gray-600 text-xs font-light">
                   {i18n.language === 'he' 
                     ? 'קו מלא = קשר בינוני (3)' 
                     : 'Solid line = Medium connection (3)'}
@@ -284,11 +300,11 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
                     y1="1" 
                     x2="40" 
                     y2="1" 
-                    stroke="#9bb5d1" 
-                    strokeWidth="2"
+                    stroke="rgba(155, 181, 209, 0.4)" 
+                    strokeWidth="1.2"
                   />
                 </svg>
-                <span className="text-gray-600 text-xs">
+                <span className="text-gray-600 text-xs font-light">
                   {i18n.language === 'he' 
                     ? 'קו דק = קשר חלש (1-2)' 
                     : 'Thin solid line = Weak connection (1-2)'}

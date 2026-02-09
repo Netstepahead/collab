@@ -9,10 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ContactForm } from '@/components/contacts/ContactForm';
+import { ImportDialog } from '@/components/contacts/ImportDialog';
 import { useAuthStore } from '@/stores/authStore';
 import { ContactsService } from '@/lib/contactsService';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type { Contact, ContactFormData } from '@/types/contact';
+import { Upload } from 'lucide-react';
 import '@/lib/i18n';
 
 export default function ContactsPage() {
@@ -27,6 +29,7 @@ export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -109,6 +112,39 @@ export default function ContactsPage() {
     }
   };
 
+  const handleImport = async (contacts: ContactFormData[]) => {
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const contactData of contacts) {
+        const { error } = await ContactsService.createContact(contactData);
+        if (error) {
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      }
+
+      await loadContacts();
+      
+      if (errorCount > 0) {
+        setError(
+          i18n.language === 'he'
+            ? `יובאו ${successCount} קשרים, ${errorCount} נכשלו`
+            : `Imported ${successCount} contacts, ${errorCount} failed`
+        );
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredContacts = contacts.filter(contact =>
     contact.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     contact.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -163,12 +199,22 @@ export default function ContactsPage() {
                   : 'Manage your professional network'}
               </p>
             </div>
-            <Button
-              onClick={handleAddContact}
-              className="bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg"
-            >
-              {i18n.language === 'he' ? '+ הוסף קשר' : '+ Add Contact'}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsImportDialogOpen(true)}
+                variant="outline"
+                className="border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {i18n.language === 'he' ? 'ייבא' : 'Import'}
+              </Button>
+              <Button
+                onClick={handleAddContact}
+                className="bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg"
+              >
+                {i18n.language === 'he' ? '+ הוסף קשר' : '+ Add Contact'}
+              </Button>
+            </div>
           </div>
 
           {/* Search */}
@@ -307,6 +353,13 @@ export default function ContactsPage() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Import Dialog */}
+      <ImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImport={handleImport}
+      />
     </div>
   );
 }
