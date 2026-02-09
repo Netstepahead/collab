@@ -374,8 +374,16 @@ export default function ContactsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEditContact(contact)}
+                        onClick={() => router.push(`/contacts/${contact.id}`)}
                         className="flex-1 border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
+                      >
+                        {i18n.language === 'he' ? 'צפה' : 'View'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditContact(contact)}
+                        className="border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
                       >
                         {i18n.language === 'he' ? 'ערוך' : 'Edit'}
                       </Button>

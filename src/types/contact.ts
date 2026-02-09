@@ -43,3 +43,9 @@ export interface Interaction {
   interaction_type: 'meeting' | 'call' | 'email' | 'message' | 'event' | 'other';
   notes?: string | null;
 }
+
+export interface InteractionFormData {
+  interaction_date: string;
+  interaction_type: 'meeting' | 'call' | 'email' | 'message' | 'event' | 'other';
+  notes?: string;
+}
