@@ -206,36 +206,58 @@ export class GmailIntegration {
     }
 
     try {
-      // Try exact match first
-      const { data: exactMatch } = await supabase
-        .from('contacts')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('email', email.toLowerCase())
-        .limit(1)
-        .single();
+      const normalizedEmail = email.toLowerCase().trim();
+      console.log(`[Gmail Sync] Matching email: ${normalizedEmail}`);
 
-      if (exactMatch) {
-        return exactMatch.id;
-      }
-
-      // Try partial match (email domain)
-      const emailDomain = email.split('@')[1];
-      const { data: domainMatch } = await supabase
+      // Get all contacts with emails for this user
+      const { data: contacts, error: contactsError } = await supabase
         .from('contacts')
         .select('id, email')
         .eq('user_id', userId)
-        .ilike('email', `%@${emailDomain}`)
-        .limit(1)
-        .single();
+        .not('email', 'is', null);
 
-      if (domainMatch) {
-        return domainMatch.id;
+      if (contactsError) {
+        console.error('[Gmail Sync] Error fetching contacts:', contactsError);
+        return null;
       }
 
+      if (!contacts || contacts.length === 0) {
+        console.log('[Gmail Sync] No contacts with email addresses found');
+        return null;
+      }
+
+      console.log(`[Gmail Sync] Checking against ${contacts.length} contacts with emails`);
+
+      // Try exact match first (case-insensitive, trimmed)
+      for (const contact of contacts) {
+        if (contact.email) {
+          const contactEmail = contact.email.toLowerCase().trim();
+          if (contactEmail === normalizedEmail) {
+            console.log(`[Gmail Sync] ✓ Exact match found: ${contactEmail} -> contact ${contact.id}`);
+            return contact.id;
+          }
+        }
+      }
+
+      // Try domain match
+      const emailDomain = normalizedEmail.split('@')[1];
+      if (emailDomain) {
+        for (const contact of contacts) {
+          if (contact.email) {
+            const contactEmail = contact.email.toLowerCase().trim();
+            const contactDomain = contactEmail.split('@')[1];
+            if (contactDomain === emailDomain) {
+              console.log(`[Gmail Sync] ✓ Domain match found: ${contactEmail} -> contact ${contact.id}`);
+              return contact.id;
+            }
+          }
+        }
+      }
+
+      console.log(`[Gmail Sync] ✗ No match found for ${normalizedEmail}`);
       return null;
     } catch (error) {
-      console.error('Error matching email to contact:', error);
+      console.error('[Gmail Sync] Error matching email to contact:', error);
       return null;
     }
   }
