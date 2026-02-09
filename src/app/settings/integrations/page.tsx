@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/authStore';
 import { IntegrationsService } from '@/lib/integrations/integrationsService';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { Mail, CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react';
 import '@/lib/i18n';
 import type { Database } from '@/types/database';
@@ -134,11 +134,18 @@ export default function IntegrationsPage() {
     setSuccess('');
 
     try {
-      const token = await user?.getIdToken();
+      // Get Supabase session token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        setError(i18n.language === 'he' ? 'לא ניתן לקבל אסימון אימות' : 'Failed to get authentication token');
+        return;
+      }
+
       const response = await fetch('/api/integrations/gmail/sync', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -198,12 +205,19 @@ export default function IntegrationsPage() {
         return;
       }
 
+      // Get Supabase session token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        setError(i18n.language === 'he' ? 'לא ניתן לקבל אסימון אימות' : 'Failed to get authentication token');
+        return;
+      }
+
       // Save tokens to database
-      const token = await user.getIdToken();
       const saveResponse = await fetch('/api/integrations/gmail/save', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
