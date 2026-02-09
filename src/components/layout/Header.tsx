@@ -96,6 +96,14 @@ export function Header() {
               >
                 {i18n.language === 'he' ? 'רשת' : 'Network'}
               </Link>
+              <Link
+                href="/profile"
+                className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+                  isActive('/profile') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
+                }`}
+              >
+                {i18n.language === 'he' ? 'פרופיל' : 'Profile'}
+              </Link>
             </>
           )}
         </nav>
