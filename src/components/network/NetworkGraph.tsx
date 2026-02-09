@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactFlow, {
   Node,
   Edge,
@@ -96,6 +97,8 @@ const nodeTypes: NodeTypes = {
 };
 
 export function NetworkGraph({ contacts }: NetworkGraphProps) {
+  const { i18n } = useTranslation();
+  
   // Create nodes and edges
   const { nodes, edges } = useMemo(() => {
     const centerNode: Node = {
@@ -130,14 +133,18 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
       const strength = contact.connection_strength || 1;
       
       // Edge thickness based on strength (1-5)
-      const strokeWidth = 1 + (strength * 0.5); // 1.5px to 3.5px
+      const strokeWidth = 1.5 + (strength * 0.7); // 2.2px to 5px
       
       // Edge color based on strength
       const strokeColor = strength >= 4
-        ? '#1B365D' // Strong - dark navy
+        ? '#1B365D' // Strong (4-5) - dark navy
         : strength >= 3
-        ? '#2a4d80' // Medium - medium navy
-        : '#9bb5d1'; // Weak - light navy
+        ? '#2a4d80' // Medium (3) - medium navy
+        : '#9bb5d1'; // Weak (1-2) - light navy
+
+      // For strong connections, use animated dashed line to show active/strong relationship
+      // For medium/weak, use solid lines
+      const isStrong = strength >= 4;
 
       return {
         id: `center-${contact.id}`,
@@ -146,8 +153,13 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
         style: {
           stroke: strokeColor,
           strokeWidth,
+          strokeDasharray: isStrong ? '5,5' : '0', // Dashed for strong, solid for others
         },
-        animated: strength >= 4, // Animate strong connections
+        animated: isStrong, // Animated flow effect for strong connections (4-5)
+        markerEnd: {
+          type: 'arrowclosed',
+          color: strokeColor,
+        },
       };
     });
 
@@ -202,24 +214,86 @@ export function NetworkGraph({ contacts }: NetworkGraphProps) {
         
         {/* Legend */}
         <div className="p-4 border-t border-[#1B365D]/10 bg-[#FAF9F6]/50">
-          <div className="flex flex-wrap items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-[#1B365D]"></div>
-              <span className="text-gray-600">
-                Strong connection (4-5)
-              </span>
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-[#1B365D] mb-2">
+              {i18n.language === 'he' ? 'מקרא עוצמת קשר:' : 'Connection Strength Legend:'}
+            </h3>
+            <div className="flex flex-wrap items-center gap-6 text-sm">
+              {/* Node Colors */}
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-[#1B365D] border-2 border-white shadow"></div>
+                <span className="text-gray-700 font-medium">
+                  {i18n.language === 'he' ? 'חזק (4-5)' : 'Strong (4-5)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#2a4d80] border-2 border-white shadow"></div>
+                <span className="text-gray-700 font-medium">
+                  {i18n.language === 'he' ? 'בינוני (3)' : 'Medium (3)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-[#4a6fa5] border-2 border-white shadow"></div>
+                <span className="text-gray-700 font-medium">
+                  {i18n.language === 'he' ? 'חלש (1-2)' : 'Weak (1-2)'}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-[#2a4d80]"></div>
-              <span className="text-gray-600">
-                Medium connection (3)
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-[#4a6fa5]"></div>
-              <span className="text-gray-600">
-                Weak connection (1-2)
-              </span>
+            <div className="flex flex-wrap items-center gap-6 text-sm pt-2 border-t border-[#1B365D]/10">
+              {/* Edge Styles */}
+              <div className="flex items-center gap-2">
+                <svg width="40" height="2" className="overflow-visible">
+                  <line 
+                    x1="0" 
+                    y1="1" 
+                    x2="40" 
+                    y2="1" 
+                    stroke="#1B365D" 
+                    strokeWidth="3" 
+                    strokeDasharray="5,5"
+                    className="animate-pulse"
+                  />
+                </svg>
+                <span className="text-gray-600 text-xs">
+                  {i18n.language === 'he' 
+                    ? 'קו מקווקו מונפש = קשר חזק (4-5)' 
+                    : 'Animated dashed line = Strong connection (4-5)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg width="40" height="2">
+                  <line 
+                    x1="0" 
+                    y1="1" 
+                    x2="40" 
+                    y2="1" 
+                    stroke="#2a4d80" 
+                    strokeWidth="2.5"
+                  />
+                </svg>
+                <span className="text-gray-600 text-xs">
+                  {i18n.language === 'he' 
+                    ? 'קו מלא = קשר בינוני (3)' 
+                    : 'Solid line = Medium connection (3)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg width="40" height="2">
+                  <line 
+                    x1="0" 
+                    y1="1" 
+                    x2="40" 
+                    y2="1" 
+                    stroke="#9bb5d1" 
+                    strokeWidth="2"
+                  />
+                </svg>
+                <span className="text-gray-600 text-xs">
+                  {i18n.language === 'he' 
+                    ? 'קו דק = קשר חלש (1-2)' 
+                    : 'Thin solid line = Weak connection (1-2)'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
