@@ -62,12 +62,30 @@ export default function IntegrationsPage() {
 
   const handleConnectGmail = async () => {
     try {
+      setLoading(true);
+      setError('');
+      
       // Get OAuth URL from API
       const response = await fetch('/api/integrations/gmail/connect-client');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to get OAuth URL' }));
+        setError(errorData.error || 'Failed to connect Gmail');
+        setLoading(false);
+        return;
+      }
+      
       const data = await response.json();
       
       if (data.error) {
         setError(data.error);
+        setLoading(false);
+        return;
+      }
+
+      if (!data.authUrl) {
+        setError('No authorization URL received');
+        setLoading(false);
         return;
       }
 
@@ -77,7 +95,9 @@ export default function IntegrationsPage() {
       // Redirect to Google OAuth
       window.location.href = data.authUrl;
     } catch (error: any) {
+      console.error('Error connecting Gmail:', error);
       setError(error.message || 'Failed to connect Gmail');
+      setLoading(false);
     }
   };
 
