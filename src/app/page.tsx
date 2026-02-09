@@ -7,12 +7,19 @@ import { Network, Users, CheckSquare2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { QuestionnaireService } from '@/lib/questionnaireService';
+import { profiles } from '@/data/profiles';
+import { useAuthStore } from '@/stores/authStore';
 import '@/lib/i18n';
 
 export default function Home() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     setMounted(true);
@@ -22,6 +29,25 @@ export default function Home() {
     document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
+
+  // Check if user has completed questionnaire
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (!user) {
+        setLoadingProfile(false);
+        return;
+      }
+
+      const { data, error } = await QuestionnaireService.getLatestResult();
+      if (data && !error) {
+        setHasProfile(true);
+        setProfileData(data);
+      }
+      setLoadingProfile(false);
+    };
+
+    checkProfile();
+  }, [user]);
 
   if (!mounted) {
     return null;
@@ -49,15 +75,55 @@ export default function Home() {
     }
   ];
 
-  const features = [
-    {
+  // Determine profile card content based on whether user has completed questionnaire
+  const getProfileCardContent = () => {
+    if (loadingProfile) {
+      return {
+        title: i18n.language === 'he' ? 'כישורי הרשת שלך' : 'Your Network Skills',
+        description: i18n.language === 'he' 
+          ? 'טוען...'
+          : 'Loading...',
+        buttonText: i18n.language === 'he' ? 'התחל הערכה' : 'Start Assessment',
+        action: () => router.push('/questionnaire'),
+      };
+    }
+
+    if (hasProfile && profileData) {
+      const currentLanguage = (profileData.language || i18n.language) as 'en' | 'he';
+      const primaryProfile = profiles[currentLanguage][profileData.primary_archetype];
+      
+      return {
+        title: i18n.language === 'he' ? 'הפרופיל הרשתי שלך' : 'Your Network Profile',
+        description: i18n.language === 'he'
+          ? `ארכיטייפ ראשי: ${primaryProfile.name}. צפה בפרופיל המלא שלך עם החוזקות והמלצות לפיתוח.`
+          : `Primary Archetype: ${primaryProfile.name}. View your complete profile with strengths and development recommendations.`,
+        buttonText: i18n.language === 'he' ? 'פתח את המיומנויות שלך' : 'Develop Your Skills',
+        action: () => router.push('/results'),
+        profileName: primaryProfile.name,
+      };
+    }
+
+    return {
       title: i18n.language === 'he' ? 'כישורי הרשת שלך' : 'Your Network Skills',
       description: i18n.language === 'he' 
-        ? 'השלם את השאלון להערכת כישורי הרשת שלך וצפה בדוח המפורט עם הארכיטייפ, החוזקות והמלצות לפיתוח'
-        : 'Complete the assessment questionnaire to understand your networking skills and view your detailed report with archetype, strengths, and development recommendations',
-      icon: Network,
+        ? 'השלם את השאלון להערכת כישורי הרשת שלך וצפה בפרופיל המפורט עם הארכיטייפ, החוזקות והמלצות לפיתוח'
+        : 'Complete the assessment questionnaire to understand your networking skills and view your detailed profile with archetype, strengths, and development recommendations',
+      buttonText: i18n.language === 'he' ? 'התחל הערכה' : 'Start Assessment',
       action: () => router.push('/questionnaire'),
-      buttonText: i18n.language === 'he' ? 'התחל הערכה' : 'Start Assessment'
+    };
+  };
+
+  const profileCardContent = getProfileCardContent();
+
+  const features = [
+    {
+      title: profileCardContent.title,
+      description: profileCardContent.description,
+      icon: Network,
+      action: profileCardContent.action,
+      buttonText: profileCardContent.buttonText,
+      profileName: profileCardContent.profileName,
+      hasProfile: hasProfile,
     },
     {
       title: i18n.language === 'he' ? 'נהל קשרים' : 'Manage Contacts',
@@ -113,6 +179,13 @@ export default function Home() {
                     </div>
                   </div>
                   <CardTitle className="text-2xl font-serif text-[#1B365D]">{feature.title}</CardTitle>
+                  {feature.hasProfile && feature.profileName && (
+                    <div className="mt-2 mb-2">
+                      <span className="inline-block px-3 py-1 bg-[#E87722]/10 text-[#E87722] rounded-full text-sm font-medium">
+                        {feature.profileName}
+                      </span>
+                    </div>
+                  )}
                   <CardDescription className="text-base text-gray-600 font-light mt-2">
                     {feature.description}
                   </CardDescription>
@@ -178,7 +251,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1 text-[#1B365D]">
-                    {i18n.language === 'he' ? 'קבל את הדוח שלך' : 'Get Your Report'}
+                    {i18n.language === 'he' ? 'קבל את הפרופיל שלך' : 'Get Your Profile'}
                   </h3>
                   <p className="text-gray-600 font-light">
                     {i18n.language === 'he'

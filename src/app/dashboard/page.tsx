@@ -60,8 +60,8 @@ export default function DashboardPage() {
               <CardContent className="space-y-4">
                 <p>
                   {i18n.language === 'he'
-                    ? 'כדי לראות את הדוח המלא שלך ולקבל המלצות מותאמות אישית, השלם את השאלון תחילה.'
-                    : 'To see your full report and get personalized recommendations, complete the questionnaire first.'}
+                    ? 'כדי לראות את הפרופיל המלא שלך ולקבל המלצות מותאמות אישית, השלם את השאלון תחילה.'
+                    : 'To see your full profile and get personalized recommendations, complete the questionnaire first.'}
                 </p>
                 <Button
                   onClick={() => router.push('/questionnaire')}
@@ -86,7 +86,7 @@ export default function DashboardPage() {
                       onClick={() => router.push('/results')}
                       className="w-full"
                     >
-                      {i18n.language === 'he' ? 'צפה בדוח' : 'View Report'}
+                      {i18n.language === 'he' ? 'צפה בפרופיל' : 'View Profile'}
                     </Button>
                   </CardContent>
                 </Card>
