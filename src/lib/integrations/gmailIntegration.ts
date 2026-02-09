@@ -125,11 +125,20 @@ export class GmailIntegration {
         ? `after:${Math.floor(afterDate.getTime() / 1000)}`
         : '';
 
-      const response = await gmail.users.messages.list({
+      const listParams: any = {
         userId: 'me',
         maxResults,
-        q: query,
-      });
+      };
+      
+      if (query) {
+        listParams.q = query;
+      }
+      
+      console.log(`[Gmail Sync] Fetching emails with query: ${query || '(none)'}, maxResults: ${maxResults}`);
+      
+      const response = await gmail.users.messages.list(listParams);
+      
+      console.log(`[Gmail Sync] Gmail API returned ${response.data.messages?.length || 0} message IDs`);
 
       const messages = response.data.messages || [];
       const emailMetadata: EmailMetadata[] = [];
@@ -246,14 +255,21 @@ export class GmailIntegration {
 
       console.log(`[Gmail Sync] Found ${totalEmails} emails since ${afterDate.toISOString()}`);
 
+      // Get user email once (cached)
+      const userEmail = await this.getUserEmail();
+      console.log(`[Gmail Sync] User email: ${userEmail}`);
+
       for (const email of emails) {
         try {
           // Determine if this is a sent or received email
-          const userEmail = await this.getUserEmail();
-          const isSent = email.to.includes(userEmail);
+          // If user's email is in "from", it's a sent email
+          // If user's email is in "to", it's a received email
+          const isSent = email.from.toLowerCase() === userEmail.toLowerCase();
           const otherPartyEmail = isSent 
-            ? email.to.find(e => e !== userEmail) || email.to[0]
+            ? email.to.find(e => e.toLowerCase() !== userEmail.toLowerCase()) || email.to[0]
             : email.from;
+          
+          console.log(`[Gmail Sync] Processing email: ${isSent ? 'SENT' : 'RECEIVED'} from/to ${otherPartyEmail}`);
 
           // Match to contact
           const contactId = await GmailIntegration.matchEmailToContact(otherPartyEmail, userId);
