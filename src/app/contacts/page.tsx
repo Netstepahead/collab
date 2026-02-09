@@ -122,17 +122,17 @@ export default function ContactsPage() {
   // If Supabase not configured, show fallback UI
   if (!isSupabaseConfigured()) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-[#FAF9F6] network-bg">
         <Header />
         
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <Card>
+            <Card className="border-[#1B365D]/10 bg-white/80 backdrop-blur-sm shadow-card">
               <CardHeader>
-                <CardTitle>
+                <CardTitle className="font-serif text-[#1B365D]">
                   {i18n.language === 'he' ? '⚠️ נדרש Supabase' : '⚠️ Supabase Required'}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600">
                   {i18n.language === 'he'
                     ? 'על מנת להשתמש ב-CRM, יש להגדיר Supabase. ראה README לפרטים.'
                     : 'To use the CRM, you need to configure Supabase. See README for details.'}
@@ -146,7 +146,7 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-[#FAF9F6] network-bg">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -154,10 +154,10 @@ export default function ContactsPage() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold">
+              <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1B365D]">
                 {i18n.language === 'he' ? 'קשרים' : 'Contacts'}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 font-light">
                 {i18n.language === 'he'
                   ? 'נהל את הרשת המקצועית שלך'
                   : 'Manage your professional network'}
@@ -165,21 +165,21 @@ export default function ContactsPage() {
             </div>
             <Button
               onClick={handleAddContact}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg"
             >
               {i18n.language === 'he' ? '+ הוסף קשר' : '+ Add Contact'}
             </Button>
           </div>
 
           {/* Search */}
-          <Card>
+          <Card className="border-[#1B365D]/10 bg-white/80 backdrop-blur-sm shadow-card">
             <CardContent className="pt-6">
               <Input
                 type="search"
                 placeholder={i18n.language === 'he' ? 'חפש קשרים...' : 'Search contacts...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-md"
+                className="max-w-md border-[#1B365D]/20 focus:border-[#1B365D] focus:ring-[#1B365D]/20"
               />
             </CardContent>
           </Card>
@@ -194,21 +194,24 @@ export default function ContactsPage() {
           {/* Contacts Grid */}
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-              <p className="mt-4 text-gray-600">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#1B365D] border-r-transparent"></div>
+              <p className="mt-4 text-gray-600 font-light">
                 {i18n.language === 'he' ? 'טוען...' : 'Loading...'}
               </p>
             </div>
           ) : filteredContacts.length === 0 ? (
-            <Card>
+            <Card className="border-[#1B365D]/10 bg-white/80 backdrop-blur-sm shadow-card">
               <CardContent className="py-12 text-center">
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 font-light">
                   {searchQuery
                     ? (i18n.language === 'he' ? 'לא נמצאו קשרים' : 'No contacts found')
                     : (i18n.language === 'he' ? 'אין קשרים עדיין' : 'No contacts yet')}
                 </p>
                 {!searchQuery && (
-                  <Button onClick={handleAddContact}>
+                  <Button 
+                    onClick={handleAddContact}
+                    className="bg-[#1B365D] hover:bg-[#2a4d80] text-white"
+                  >
                     {i18n.language === 'he' ? 'הוסף קשר ראשון' : 'Add your first contact'}
                   </Button>
                 )}
@@ -217,28 +220,28 @@ export default function ContactsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredContacts.map((contact) => (
-                <Card key={contact.id} className="hover:shadow-lg transition-shadow">
+                <Card key={contact.id} className="hover:shadow-card transition-smooth border-[#1B365D]/10 bg-white/80 backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="text-lg">{contact.full_name}</CardTitle>
+                    <CardTitle className="text-lg font-serif text-[#1B365D]">{contact.full_name}</CardTitle>
                     {contact.company && (
-                      <CardDescription>{contact.company}</CardDescription>
+                      <CardDescription className="text-gray-600">{contact.company}</CardDescription>
                     )}
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {contact.job_title && (
-                      <p className="text-sm text-gray-600">{contact.job_title}</p>
+                      <p className="text-sm text-gray-600 font-light">{contact.job_title}</p>
                     )}
                     {contact.email && (
-                      <p className="text-sm text-blue-600">{contact.email}</p>
+                      <p className="text-sm text-[#1B365D]">{contact.email}</p>
                     )}
                     {contact.connection_strength && (
                       <div className="flex items-center text-sm">
-                        <span className="mr-2">
+                        <span className="mr-2 text-gray-600 font-light">
                           {i18n.language === 'he' ? 'עוצמה:' : 'Strength:'}
                         </span>
                         <div className="flex">
                           {[1, 2, 3, 4, 5].map((i) => (
-                            <span key={i} className={i <= contact.connection_strength! ? 'text-blue-600' : 'text-gray-300'}>
+                            <span key={i} className={i <= contact.connection_strength! ? 'text-[#E87722]' : 'text-gray-300'}>
                               ★
                             </span>
                           ))}
@@ -250,7 +253,7 @@ export default function ContactsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEditContact(contact)}
-                        className="flex-1"
+                        className="flex-1 border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
                       >
                         {i18n.language === 'he' ? 'ערוך' : 'Edit'}
                       </Button>
@@ -258,7 +261,7 @@ export default function ContactsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteContact(contact.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         {i18n.language === 'he' ? 'מחק' : 'Delete'}
                       </Button>
@@ -273,14 +276,14 @@ export default function ContactsPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-[#1B365D]/10">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-serif text-[#1B365D]">
               {editingContact
                 ? (i18n.language === 'he' ? 'ערוך קשר' : 'Edit Contact')
                 : (i18n.language === 'he' ? 'הוסף קשר חדש' : 'Add New Contact')}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600">
               {i18n.language === 'he'
                 ? 'מלא את הפרטים של הקשר'
                 : 'Fill in the contact details'}

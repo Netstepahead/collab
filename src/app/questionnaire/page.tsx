@@ -135,7 +135,7 @@ export default function QuestionnairePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-[#FAF9F6] network-bg">
       <Header />
       
       <div className="questionnaire-container">
@@ -143,11 +143,11 @@ export default function QuestionnairePage() {
           {/* Logo */}
           <div className="questionnaire-logo">
             <img 
-              src="/logo-step-ahead-dark.png" 
+              src="/logo-stepahead.svg" 
               alt="StepAhead"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = '/logo-step-ahead.png';
+                target.style.display = 'none';
               }}
             />
           </div>

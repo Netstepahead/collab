@@ -84,10 +84,10 @@ export default function ResultsPage() {
 
   if (!mounted || loadingSaved) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-[#FAF9F6] network-bg">
         <Header />
         <div className="container mx-auto px-4 py-8 text-center">
-          <p>{i18n.language === 'he' ? 'טוען...' : 'Loading...'}</p>
+          <p className="text-[#1B365D]">{i18n.language === 'he' ? 'טוען...' : 'Loading...'}</p>
         </div>
       </div>
     );
@@ -135,13 +135,13 @@ export default function ResultsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-[#FAF9F6] network-bg">
       <Header />
       
       <div className="container mx-auto px-4 py-8 space-y-6 max-w-4xl">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1B365D]">
             {i18n.language === 'he' ? 'הפרופיל הרשתי שלך' : 'Your Network Profile'}
           </h1>
           <p className="text-muted-foreground">
@@ -162,27 +162,27 @@ export default function ResultsPage() {
         </div>
 
         {/* Primary Archetype */}
-        <Card className="border-2 border-blue-500">
+        <Card className="border-2 border-[#1B365D]/20 bg-white/80 backdrop-blur-sm shadow-card">
           <CardHeader>
-            <CardTitle className="text-3xl">{primaryProfile.name}</CardTitle>
-            <CardDescription className="text-lg">
+            <CardTitle className="text-3xl font-serif text-[#1B365D]">{primaryProfile.name}</CardTitle>
+            <CardDescription className="text-lg text-gray-600">
               {i18n.language === 'he' ? 'הארכיטייפ הראשי שלך' : 'Your Primary Archetype'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-lg">{primaryProfile.description}</p>
+            <p className="text-lg text-gray-700 font-light">{primaryProfile.description}</p>
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Strengths */}
               <div>
-                <h3 className="font-semibold text-lg mb-3 text-green-700">
+                <h3 className="font-semibold text-lg mb-3 text-[#1B365D]">
                   ✓ {i18n.language === 'he' ? 'החוזקות שלך' : 'Your Strengths'}
                 </h3>
                 <ul className="space-y-2">
                   {primaryProfile.strengths.map((strength, idx) => (
                     <li key={idx} className="flex items-start">
-                      <span className="text-green-600 mr-2">•</span>
-                      <span>{strength}</span>
+                      <span className="text-[#1B365D] mr-2">•</span>
+                      <span className="text-gray-700 font-light">{strength}</span>
                     </li>
                   ))}
                 </ul>
@@ -190,14 +190,14 @@ export default function ResultsPage() {
 
               {/* Challenges */}
               <div>
-                <h3 className="font-semibold text-lg mb-3 text-orange-700">
+                <h3 className="font-semibold text-lg mb-3 text-[#E87722]">
                   ⚡ {i18n.language === 'he' ? 'תחומים לפיתוח' : 'Areas for Growth'}
                 </h3>
                 <ul className="space-y-2">
                   {primaryProfile.challenges.map((challenge, idx) => (
                     <li key={idx} className="flex items-start">
-                      <span className="text-orange-600 mr-2">•</span>
-                      <span>{challenge}</span>
+                      <span className="text-[#E87722] mr-2">•</span>
+                      <span className="text-gray-700 font-light">{challenge}</span>
                     </li>
                   ))}
                 </ul>
@@ -206,14 +206,14 @@ export default function ResultsPage() {
 
             {/* Core Indicators */}
             <div>
-              <h3 className="font-semibold text-lg mb-2">
+              <h3 className="font-semibold text-lg mb-2 text-[#1B365D]">
                 {i18n.language === 'he' ? 'מדדי ליבה' : 'Core Indicators'}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {primaryProfile.coreIndicators.map((indicator, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                    className="px-3 py-1 bg-[#1B365D]/10 text-[#1B365D] rounded-full text-sm font-medium"
                   >
                     {indicator}
                   </span>
@@ -225,20 +225,20 @@ export default function ResultsPage() {
 
         {/* Secondary Archetype */}
         {secondaryProfile && (
-          <Card>
+          <Card className="border-[#1B365D]/10 bg-white/80 backdrop-blur-sm shadow-card">
             <CardHeader>
-              <CardTitle className="text-2xl">{secondaryProfile.name}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-serif text-[#1B365D]">{secondaryProfile.name}</CardTitle>
+              <CardDescription className="text-gray-600">
                 {i18n.language === 'he' ? 'הארכיטייפ המשני שלך' : 'Your Secondary Archetype'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p>{secondaryProfile.description}</p>
+              <p className="text-gray-700 font-light">{secondaryProfile.description}</p>
               <div className="flex flex-wrap gap-2">
                 {secondaryProfile.coreIndicators.map((indicator, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                    className="px-3 py-1 bg-[#1B365D]/5 text-[#1B365D] rounded-full text-sm font-light"
                   >
                     {indicator}
                   </span>
@@ -249,12 +249,12 @@ export default function ResultsPage() {
         )}
 
         {/* Skill Scores */}
-        <Card>
+        <Card className="border-[#1B365D]/10 bg-white/80 backdrop-blur-sm shadow-card">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="font-serif text-[#1B365D]">
               {i18n.language === 'he' ? 'ציוני המיומנויות שלך' : 'Your Skill Scores'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600">
               {i18n.language === 'he'
                 ? 'פירוט מפורט של היכולות הרשתיות שלך'
                 : 'Detailed breakdown of your networking capabilities'}
@@ -270,14 +270,14 @@ export default function ResultsPage() {
                 return (
                   <div key={skillId} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium">{skillName}</span>
-                      <span className="text-muted-foreground">
+                      <span className="font-medium text-[#1B365D]">{skillName}</span>
+                      <span className="text-gray-600">
                         {scoreValue.toFixed(1)} / 5.0
                       </span>
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-2 bg-[#1B365D]/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all"
+                        className="h-full bg-gradient-to-r from-[#1B365D] to-[#2a4d80] transition-all"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -293,7 +293,7 @@ export default function ResultsPage() {
           <Button
             onClick={handleContinueToCRM}
             size="lg"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg"
           >
             {i18n.language === 'he' ? 'המשך ל-CRM אישי' : 'Continue to Personal CRM'}
           </Button>
@@ -301,6 +301,7 @@ export default function ResultsPage() {
             onClick={handleGoHome}
             variant="outline"
             size="lg"
+            className="border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
           >
             {i18n.language === 'he' ? 'חזור לעמוד הבית' : 'Back to Home'}
           </Button>
@@ -308,6 +309,7 @@ export default function ResultsPage() {
             onClick={handleReset}
             variant="outline"
             size="lg"
+            className="border-[#E87722]/20 text-[#E87722] hover:bg-[#E87722]/5"
           >
             {i18n.language === 'he' ? 'בצע הערכה מחדש' : 'Retake Assessment'}
           </Button>
