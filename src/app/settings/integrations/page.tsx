@@ -163,42 +163,43 @@ export default function IntegrationsPage() {
   // Handle OAuth callback
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
+    const oauthSuccess = urlParams.get('oauth_success');
     const error = urlParams.get('error');
 
     if (error) {
       setError(i18n.language === 'he' ? `שגיאת OAuth: ${error}` : `OAuth error: ${error}`);
+      // Clean URL
+      window.history.replaceState({}, '', '/settings/integrations');
       return;
     }
 
-    if (code) {
-      handleOAuthCallback(code);
-    }
-  }, []);
+    // Handle successful OAuth callback (tokens in URL params from callback route)
+    if (oauthSuccess === 'true') {
+      const accessToken = urlParams.get('access_token');
+      const refreshToken = urlParams.get('refresh_token');
+      const expiresAt = urlParams.get('expires_at');
 
-  const handleOAuthCallback = async (code: string) => {
+      if (accessToken) {
+        handleSaveTokens(accessToken, refreshToken, expiresAt);
+      } else {
+        setError(i18n.language === 'he' ? 'לא התקבלו אסימונים' : 'No tokens received');
+        window.history.replaceState({}, '', '/settings/integrations');
+      }
+    }
+  }, [user]);
+
+  const handleSaveTokens = async (accessToken: string, refreshToken: string | null, expiresAt: string | null) => {
     try {
       setLoading(true);
       setError('');
 
-      // Exchange code for tokens
-      const tokenResponse = await fetch('/api/integrations/gmail/callback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
-      });
-
-      const tokenData = await tokenResponse.json();
-
-      if (tokenData.error) {
-        setError(tokenData.error);
+      if (!user) {
+        setError(i18n.language === 'he' ? 'נדרש להתחבר' : 'Please sign in');
         return;
       }
 
       // Save tokens to database
-      const token = await user?.getIdToken();
+      const token = await user.getIdToken();
       const saveResponse = await fetch('/api/integrations/gmail/save', {
         method: 'POST',
         headers: {
@@ -206,9 +207,9 @@ export default function IntegrationsPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          accessToken: tokenData.accessToken,
-          refreshToken: tokenData.refreshToken,
-          expiresAt: tokenData.expiresAt,
+          accessToken,
+          refreshToken,
+          expiresAt,
         }),
       });
 
@@ -220,11 +221,11 @@ export default function IntegrationsPage() {
         setSuccess(i18n.language === 'he' ? 'Gmail חובר בהצלחה' : 'Gmail connected successfully');
         setTimeout(() => setSuccess(''), 3000);
         loadIntegrations();
-        // Remove code from URL
+        // Clean URL - remove OAuth params
         window.history.replaceState({}, '', '/settings/integrations');
       }
     } catch (error: any) {
-      setError(error.message || 'Failed to complete OAuth flow');
+      setError(error.message || 'Failed to save tokens');
     } finally {
       setLoading(false);
     }
