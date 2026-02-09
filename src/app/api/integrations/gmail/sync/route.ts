@@ -25,10 +25,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    
-    // Get user from token
+    // Get user from token first
     const token = authHeader.replace('Bearer ', '');
+    
+    // Create Supabase client with user's access token for RLS
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+    
+    // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
@@ -38,8 +51,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get Gmail integration
-    const { data: integration, error: integrationError } = await IntegrationsService.getIntegration('gmail');
+    // Get Gmail integration using the authenticated client
+    // Query directly to avoid RLS issues
+    const { data: integration, error: integrationError } = await supabase
+      .from('integrations')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('provider', 'gmail')
+      .single();
     
     if (integrationError || !integration) {
       return NextResponse.json(
@@ -69,8 +88,15 @@ export async function POST(request: NextRequest) {
     // Sync emails
     const { synced, errors } = await gmailIntegration.syncEmails(user.id, lastSyncAt);
 
-    // Update last sync time
-    await IntegrationsService.updateLastSync(integration.id);
+    // Update last sync time using authenticated client
+    await supabase
+      .from('integrations')
+      .update({
+        last_sync_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', integration.id)
+      .eq('user_id', user.id);
 
     return NextResponse.json({
       success: true,
