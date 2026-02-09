@@ -34,10 +34,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    
-    // Get user from token
+    // Get user from token first
     const token = authHeader.replace('Bearer ', '');
+    
+    // Create Supabase client with user's access token for RLS
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+    
+    // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
@@ -47,13 +56,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save integration - pass user ID since we're in an API route
-    const { data: integration, error } = await IntegrationsService.upsertIntegration('gmail', {
-      access_token: accessToken,
-      refresh_token: refreshToken || null,
-      expires_at: expiresAt || null,
-      enabled: true,
-    }, user.id);
+    // Save integration using the authenticated Supabase client
+    // This ensures RLS policies work correctly
+    const { data: integration, error } = await IntegrationsService.upsertIntegrationWithClient(
+      supabase,
+      'gmail',
+      {
+        access_token: accessToken,
+        refresh_token: refreshToken || null,
+        expires_at: expiresAt || null,
+        enabled: true,
+      },
+      user.id
+    );
 
     if (error) {
       return NextResponse.json(

@@ -1,6 +1,7 @@
 // Service for managing integrations
 import { supabase, isSupabaseConfigured } from '../supabase';
 import type { Database } from '@/types/database';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Integration = Database['public']['Tables']['integrations']['Row'];
 type IntegrationInsert = Database['public']['Tables']['integrations']['Insert'];
@@ -58,11 +59,21 @@ export class IntegrationsService {
     }
   }
 
-  // Create or update integration
+  // Create or update integration (client-side, uses global supabase client)
   static async upsertIntegration(
     provider: string,
     integrationData: Omit<IntegrationInsert, 'id' | 'user_id' | 'provider' | 'created_at' | 'updated_at'>,
     userId?: string // Optional: pass user ID when called from API routes
+  ): Promise<{ data: Integration | null; error: Error | null }> {
+    return this.upsertIntegrationWithClient(supabase, provider, integrationData, userId);
+  }
+
+  // Create or update integration with a specific Supabase client (for API routes)
+  static async upsertIntegrationWithClient(
+    client: SupabaseClient<Database>,
+    provider: string,
+    integrationData: Omit<IntegrationInsert, 'id' | 'user_id' | 'provider' | 'created_at' | 'updated_at'>,
+    userId?: string
   ): Promise<{ data: Integration | null; error: Error | null }> {
     try {
       if (!isSupabaseConfigured()) {
@@ -76,7 +87,7 @@ export class IntegrationsService {
         finalUserId = userId;
       } else {
         // Get user ID from current session (client-side)
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await client.auth.getUser();
         if (!user) {
           throw new Error('User not authenticated');
         }
@@ -84,7 +95,7 @@ export class IntegrationsService {
       }
 
       // @ts-ignore - Supabase type inference issue
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('integrations')
         .upsert({
           user_id: finalUserId,
