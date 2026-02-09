@@ -161,9 +161,8 @@ export default function IntegrationsPage() {
       setLoading(true);
       setError('');
 
-      // Exchange code for tokens (this should be done server-side, but for now we'll do it client-side)
-      // In production, this should be done via a server endpoint
-      const response = await fetch('/api/integrations/gmail/callback', {
+      // Exchange code for tokens
+      const tokenResponse = await fetch('/api/integrations/gmail/callback', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,10 +170,32 @@ export default function IntegrationsPage() {
         body: JSON.stringify({ code }),
       });
 
-      const data = await response.json();
+      const tokenData = await tokenResponse.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (tokenData.error) {
+        setError(tokenData.error);
+        return;
+      }
+
+      // Save tokens to database
+      const token = await user?.getIdToken();
+      const saveResponse = await fetch('/api/integrations/gmail/save', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken: tokenData.accessToken,
+          refreshToken: tokenData.refreshToken,
+          expiresAt: tokenData.expiresAt,
+        }),
+      });
+
+      const saveData = await saveResponse.json();
+
+      if (saveData.error) {
+        setError(saveData.error);
       } else {
         setSuccess(i18n.language === 'he' ? 'Gmail חובר בהצלחה' : 'Gmail connected successfully');
         setTimeout(() => setSuccess(''), 3000);
