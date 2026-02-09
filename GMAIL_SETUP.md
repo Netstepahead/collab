@@ -72,7 +72,8 @@ Once your project is created and selected:
    - Click **"SAVE AND CONTINUE"**
 
 3. **Add Scopes** (Step 2 of 4) - THIS IS WHERE YOU ADD SCOPES:
-   - You'll see a page titled "Scopes"
+   
+   **If you see a "Scopes" section:**
    - Click **"ADD OR REMOVE SCOPES"** button
    - A popup window will appear with a search box
    - **Search for "Gmail"** in the search box
@@ -81,6 +82,13 @@ Once your project is created and selected:
      - ✅ `https://www.googleapis.com/auth/gmail.metadata`
    - Click **"UPDATE"** at the bottom
    - Click **"SAVE AND CONTINUE"** on the main page
+   
+   **If you DON'T see a "Scopes" section:**
+   - This might mean scopes are added automatically or the UI is different
+   - **Try this alternative**: Look for a section called "Scopes" or "OAuth scopes" on the same page
+   - **Or**: After saving app information, look for a button/link that says "Scopes" or "Add scopes"
+   - **Or**: The scopes might be added automatically when you create OAuth credentials (Step 3)
+   - **Don't worry** - you can add scopes later when creating OAuth credentials if needed
 
 4. **Test Users** (Step 3 of 4):
    - For Internal apps, you can skip this step
@@ -95,15 +103,26 @@ Once your project is created and selected:
 ## Step 3: Create OAuth 2.0 Credentials
 
 1. Go to "APIs & Services" > "Credentials"
-2. Click "Create Credentials" > "OAuth client ID"
-3. Choose "Web application"
-4. **Application name**: "Step Ahead CRM"
-5. Add authorized redirect URIs:
+   - Direct link: https://console.cloud.google.com/apis/credentials
+   - Or navigate: Hamburger menu ☰ > APIs & Services > Credentials
+2. Click **"CREATE CREDENTIALS"** button (top of page)
+3. Select **"OAuth client ID"** from dropdown
+4. **If prompted for Application type**, choose **"Web application"**
+5. **Application name**: "Step Ahead CRM" (or leave default)
+6. **Authorized redirect URIs** - Click **"ADD URI"** and add:
    - Development: `http://localhost:3000/api/integrations/gmail/callback`
    - Production: `https://your-domain.com/api/integrations/gmail/callback`
    - **Important**: Use your actual production domain (e.g., `https://collab-eight-flame.vercel.app/api/integrations/gmail/callback`)
-6. Click "Create"
-7. Copy the **Client ID** and **Client Secret** (you'll only see the secret once!)
+   - **Note**: You can add multiple URIs - add both development and production
+7. **Scopes** (if you see this section):
+   - Click **"ADD SCOPES"** or look for scope selection
+   - Add: `https://www.googleapis.com/auth/gmail.readonly`
+   - Add: `https://www.googleapis.com/auth/gmail.metadata`
+   - **Note**: If you don't see scopes here, they're already configured from Step 2
+8. Click **"CREATE"**
+9. **IMPORTANT**: Copy the **Client ID** and **Client Secret** immediately
+   - The secret is only shown once!
+   - Save them somewhere safe (you'll need them for environment variables)
 
 ## Step 4: Set Environment Variables
 
