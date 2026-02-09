@@ -41,8 +41,8 @@ export function Header() {
         <Link href="/" className="flex items-center space-x-2">
           <div className="flex items-center">
             <img 
-              src="/logo-step-ahead-dark.png" 
-              alt="Network CRM" 
+              src="/logo-stepahead.svg" 
+              alt="StepAhead" 
               className="h-10 md:h-12 w-auto transition-all duration-300"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;

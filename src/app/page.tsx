@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { Network, Users, CheckSquare2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,33 +27,56 @@ export default function Home() {
     return null;
   }
 
+  // Mock action recommendations - in the future this will come from the database
+  const actionRecommendations = [
+    {
+      text: i18n.language === 'he' 
+        ? 'צור קשר עם תום - הוא עבר לתפקיד חדש, בדוק מה איתו'
+        : 'Contact Tom - he moved to a new position, check in on him',
+      priority: 'high'
+    },
+    {
+      text: i18n.language === 'he'
+        ? 'עדכן את פרטי הקשר של שרה - השתנה האימייל שלה'
+        : 'Update Sarah\'s contact info - her email has changed',
+      priority: 'medium'
+    },
+    {
+      text: i18n.language === 'he'
+        ? 'תזכורת: פגישה עם דוד מחר בשעה 14:00'
+        : 'Reminder: Meeting with David tomorrow at 2:00 PM',
+      priority: 'medium'
+    }
+  ];
+
   const features = [
     {
-      title: i18n.language === 'he' ? 'דע את עצמך' : 'Know Yourself',
+      title: i18n.language === 'he' ? 'כישורי הרשת שלך' : 'Your Network Skills',
       description: i18n.language === 'he' 
-        ? 'גלה את הארכיטייפ הרשתי שלך דרך שאלון מבוסס מחקר'
-        : 'Discover your networking archetype through research-based questionnaire',
-      icon: '🎯',
+        ? 'השלם את השאלון להערכת כישורי הרשת שלך וצפה בדוח המפורט עם הארכיטייפ, החוזקות והמלצות לפיתוח'
+        : 'Complete the assessment questionnaire to understand your networking skills and view your detailed report with archetype, strengths, and development recommendations',
+      icon: Network,
       action: () => router.push('/questionnaire'),
-      buttonText: i18n.language === 'he' ? 'התחל שאלון' : 'Start Questionnaire'
+      buttonText: i18n.language === 'he' ? 'התחל הערכה' : 'Start Assessment'
     },
     {
       title: i18n.language === 'he' ? 'נהל קשרים' : 'Manage Contacts',
       description: i18n.language === 'he'
         ? 'CRM אישי לניהול והטיפוח של הרשת המקצועית שלך'
         : 'Personal CRM to manage and nurture your professional network',
-      icon: '👥',
+      icon: Users,
       action: () => router.push('/contacts'),
       buttonText: i18n.language === 'he' ? 'ניהול קשרים' : 'Manage Contacts'
     },
     {
-      title: i18n.language === 'he' ? 'הדוח שלי' : 'My Report',
+      title: i18n.language === 'he' ? 'לוח פעולות' : 'Action Board',
       description: i18n.language === 'he'
-        ? 'צפה בדוח שלך, החוזקות והמלצות לפיתוח'
-        : 'View your report, strengths and development recommendations',
-      icon: '📊',
+        ? 'המלצות פעולה מותאמות אישית לניהול ופיתוח הרשת שלך'
+        : 'Personalized action recommendations to manage and develop your network',
+      icon: CheckSquare2,
       action: () => router.push('/dashboard'),
-      buttonText: i18n.language === 'he' ? 'לוח בקרה' : 'Dashboard'
+      buttonText: i18n.language === 'he' ? 'צפה בהמלצות' : 'View Recommendations',
+      recommendations: actionRecommendations
     }
   ];
 
@@ -75,28 +99,52 @@ export default function Home() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {features.map((feature, idx) => (
-            <Card 
-              key={idx} 
-              className="hover:shadow-card transition-smooth border-[#1B365D]/10 bg-white/80 backdrop-blur-sm"
-            >
-              <CardHeader>
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <CardTitle className="text-2xl font-serif text-[#1B365D]">{feature.title}</CardTitle>
-                <CardDescription className="text-base text-gray-600 font-light">
-                  {feature.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={feature.action}
-                  className="w-full bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg rounded-lg"
-                >
-                  {feature.buttonText}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {features.map((feature, idx) => {
+            const IconComponent = feature.icon;
+            return (
+              <Card 
+                key={idx} 
+                className="hover:shadow-card transition-smooth border-[#1B365D]/10 bg-white/80 backdrop-blur-sm flex flex-col"
+              >
+                <CardHeader>
+                  <div className="mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-[#1B365D]/5 flex items-center justify-center">
+                      <IconComponent className="w-6 h-6 text-[#1B365D]" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-2xl font-serif text-[#1B365D]">{feature.title}</CardTitle>
+                  <CardDescription className="text-base text-gray-600 font-light mt-2">
+                    {feature.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col">
+                  {feature.recommendations && (
+                    <div className="mb-4 space-y-2 flex-1">
+                      {feature.recommendations.slice(0, 3).map((rec, recIdx) => (
+                        <div 
+                          key={recIdx}
+                          className="text-sm text-gray-600 p-2 rounded-md bg-[#FAF9F6] border border-[#1B365D]/5"
+                        >
+                          <div className="flex items-start gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${
+                              rec.priority === 'high' ? 'bg-[#E87722]' : 'bg-[#1B365D]/30'
+                            }`} />
+                            <span className="font-light">{rec.text}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Button 
+                    onClick={feature.action}
+                    className="w-full bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg rounded-lg mt-auto"
+                  >
+                    {feature.buttonText}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Info Section */}
