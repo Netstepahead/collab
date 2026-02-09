@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       : undefined;
 
     // Sync emails
-    const { synced, errors } = await gmailIntegration.syncEmails(user.id, lastSyncAt);
+    const { synced, errors, totalEmails, matchedContacts, skippedNoContact } = await gmailIntegration.syncEmails(user.id, lastSyncAt);
 
     // Update last sync time using authenticated client
     await supabase
@@ -98,11 +98,26 @@ export async function POST(request: NextRequest) {
       .eq('id', integration.id)
       .eq('user_id', user.id);
 
+    // Build detailed message
+    let message = `Synced ${synced} interactions`;
+    if (totalEmails > 0) {
+      message += ` from ${totalEmails} emails`;
+      if (skippedNoContact > 0) {
+        message += ` (${skippedNoContact} skipped - no matching contact)`;
+      }
+    }
+    if (errors > 0) {
+      message += ` (${errors} errors)`;
+    }
+
     return NextResponse.json({
       success: true,
       synced,
       errors,
-      message: `Synced ${synced} interactions${errors > 0 ? ` (${errors} errors)` : ''}`,
+      totalEmails,
+      matchedContacts,
+      skippedNoContact,
+      message,
     });
   } catch (error: any) {
     console.error('Error syncing Gmail:', error);

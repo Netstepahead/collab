@@ -232,14 +232,19 @@ export class GmailIntegration {
   }
 
   // Sync emails and create interactions
-  async syncEmails(userId: string, lastSyncAt?: Date): Promise<{ synced: number; errors: number }> {
+  async syncEmails(userId: string, lastSyncAt?: Date): Promise<{ synced: number; errors: number; totalEmails: number; matchedContacts: number; skippedNoContact: number }> {
     let synced = 0;
     let errors = 0;
+    let matchedContacts = 0;
+    let skippedNoContact = 0;
 
     try {
       // Fetch emails since last sync (or last 30 days if first sync)
       const afterDate = lastSyncAt || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const emails = await this.fetchRecentEmails(100, afterDate);
+      const totalEmails = emails.length;
+
+      console.log(`[Gmail Sync] Found ${totalEmails} emails since ${afterDate.toISOString()}`);
 
       for (const email of emails) {
         try {
@@ -255,8 +260,12 @@ export class GmailIntegration {
           
           if (!contactId) {
             // Skip if no matching contact found
+            skippedNoContact++;
+            console.log(`[Gmail Sync] Skipped email from ${otherPartyEmail} - no matching contact`);
             continue;
           }
+
+          matchedContacts++;
 
           // Check if interaction already exists for this email
           const { data: existingSource } = await supabase
@@ -309,7 +318,9 @@ export class GmailIntegration {
         }
       }
 
-      return { synced, errors };
+      console.log(`[Gmail Sync] Complete: ${synced} synced, ${matchedContacts} matched contacts, ${skippedNoContact} skipped (no contact), ${errors} errors`);
+      
+      return { synced, errors, totalEmails, matchedContacts, skippedNoContact };
     } catch (error) {
       console.error('Error syncing Gmail:', error);
       throw error;

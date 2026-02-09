@@ -155,8 +155,19 @@ export default function IntegrationsPage() {
       if (data.error) {
         setError(data.error);
       } else {
-        setSuccess(data.message || (i18n.language === 'he' ? 'סנכרון הושלם בהצלחה' : 'Sync completed successfully'));
-        setTimeout(() => setSuccess(''), 5000);
+        // Show detailed sync results
+        let successMessage = data.message || (i18n.language === 'he' ? 'סנכרון הושלם בהצלחה' : 'Sync completed successfully');
+        
+        // Add helpful details if no interactions were synced
+        if (data.synced === 0 && data.totalEmails > 0) {
+          successMessage += `\n\nFound ${data.totalEmails} emails, but ${data.skippedNoContact || 0} were skipped because they don't match any contacts in your CRM.`;
+          successMessage += '\n\nTo sync interactions, make sure the email addresses in your contacts match the email addresses in your Gmail.';
+        } else if (data.totalEmails === 0) {
+          successMessage += '\n\nNo emails found in the selected time period.';
+        }
+        
+        setSuccess(successMessage);
+        setTimeout(() => setSuccess(''), 10000); // Show longer for detailed messages
         await IntegrationsService.updateLastSync(integration.id);
         loadIntegrations();
       }
