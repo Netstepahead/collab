@@ -102,27 +102,49 @@ Once your project is created and selected:
 
 ## Step 3: Create OAuth 2.0 Credentials
 
-1. Go to "APIs & Services" > "Credentials"
+**You're here!** This is where you create the actual credentials that your app will use.
+
+### Create the OAuth Client
+
+1. You should see **"+ CREATE CREDENTIALS"** button (top of page)
    - Direct link: https://console.cloud.google.com/apis/credentials
-   - Or navigate: Hamburger menu ☰ > APIs & Services > Credentials
-2. Click **"CREATE CREDENTIALS"** button (top of page)
-3. Select **"OAuth client ID"** from dropdown
-4. **If prompted for Application type**, choose **"Web application"**
-5. **Application name**: "Step Ahead CRM" (or leave default)
-6. **Authorized redirect URIs** - Click **"ADD URI"** and add:
-   - Development: `http://localhost:3000/api/integrations/gmail/callback`
-   - Production: `https://your-domain.com/api/integrations/gmail/callback`
-   - **Important**: Use your actual production domain (e.g., `https://collab-eight-flame.vercel.app/api/integrations/gmail/callback`)
-   - **Note**: You can add multiple URIs - add both development and production
-7. **Scopes** (if you see this section):
-   - Click **"ADD SCOPES"** or look for scope selection
-   - Add: `https://www.googleapis.com/auth/gmail.readonly`
-   - Add: `https://www.googleapis.com/auth/gmail.metadata`
-   - **Note**: If you don't see scopes here, they're already configured from Step 2
-8. Click **"CREATE"**
-9. **IMPORTANT**: Copy the **Client ID** and **Client Secret** immediately
-   - The secret is only shown once!
-   - Save them somewhere safe (you'll need them for environment variables)
+2. Click **"+ CREATE CREDENTIALS"** button
+3. From the dropdown menu, select **"OAuth client ID"**
+4. **Application type**: Choose **"Web application"**
+5. **Name**: Enter `Step Ahead CRM` (or any name you prefer)
+6. **Authorized redirect URIs**: 
+   - Click **"ADD URI"** button
+   - Add these two URIs (one at a time):
+     - `http://localhost:3000/api/integrations/gmail/callback` (for development)
+     - `https://collab-eight-flame.vercel.app/api/integrations/gmail/callback` (for production)
+     - **Or use your actual production domain**
+   - You can add multiple URIs - add both development and production
+
+### About Scopes - IMPORTANT!
+
+**You might NOT see a "Scopes" field in this form. That's perfectly fine!**
+
+**Why?** Because:
+- For Internal apps, scopes are configured in the OAuth consent screen (Step 2)
+- The scopes (`gmail.readonly` and `gmail.metadata`) are automatically requested when users connect
+- You don't need to manually add them here
+
+**If you DO see a Scopes field:**
+- You can add them here, but it's optional since they're already in the consent screen
+
+### Create and Save Credentials
+
+7. Click **"CREATE"** button
+8. **IMPORTANT POPUP**: A window will appear showing:
+   - **Your OAuth client created**
+   - **Client ID**: A long string (copy this!)
+   - **Client Secret**: Another long string (copy this immediately!)
+   
+9. **Copy both values RIGHT NOW** - the Client Secret is only shown once!
+   - Save them in a text file or password manager
+   - You'll need them for the next step
+
+**Note**: If you close this popup without copying, you'll need to create new credentials.
 
 ## Step 4: Set Environment Variables
 
