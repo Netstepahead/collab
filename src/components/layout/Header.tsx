@@ -88,6 +88,14 @@ export function Header() {
               >
                 {i18n.language === 'he' ? 'לוח בקרה' : 'Dashboard'}
               </Link>
+              <Link
+                href="/network"
+                className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+                  isActive('/network') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
+                }`}
+              >
+                {i18n.language === 'he' ? 'רשת' : 'Network'}
+              </Link>
             </>
           )}
         </nav>

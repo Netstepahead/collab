@@ -118,10 +118,11 @@ export default function DashboardPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-2 font-light">
-                      {i18n.language === 'he' ? 'בקרוב' : 'Coming soon'}
-                    </p>
-                    <Button variant="outline" disabled className="w-full border-[#1B365D]/10 text-gray-400">
+                    <Button
+                      variant="outline"
+                      onClick={() => router.push('/network')}
+                      className="w-full border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5"
+                    >
                       {i18n.language === 'he' ? 'ויזואליזציה' : 'Visualization'}
                     </Button>
                   </CardContent>
