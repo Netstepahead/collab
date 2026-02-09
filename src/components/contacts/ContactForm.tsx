@@ -70,7 +70,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
     setUploadingAvatar(true);
 
     try {
-      // Create preview
+      // Create preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
@@ -82,20 +82,35 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
       
       // If editing existing contact, upload immediately
       if (contact?.id) {
-        setUploadingAvatar(true);
         const { url, error } = await StorageService.uploadContactAvatar(file, contact.id);
         if (error) {
           console.error('Error uploading avatar:', error);
-          alert(i18n.language === 'he' ? 'שגיאה בהעלאת תמונה' : 'Error uploading image');
+          // Show more detailed error message
+          let errorMsg = i18n.language === 'he' ? 'שגיאה בהעלאת תמונה' : 'Error uploading image';
+          
+          // Provide more specific error messages
+          if (error.message?.includes('permission') || error.message?.includes('policy')) {
+            errorMsg = i18n.language === 'he' 
+              ? 'שגיאת הרשאות. ודא שהדליים נוצרו והמדיניות הוגדרה.'
+              : 'Permission error. Make sure buckets are created and policies are set up.';
+          } else if (error.message) {
+            errorMsg = error.message;
+          }
+          
+          alert(errorMsg);
           setAvatarFile(null);
           setAvatarPreview(contact.avatar_url || null);
+          setUploadingAvatar(false);
+          return;
         } else if (url) {
           setFormData({ ...formData, avatar_url: url });
         }
-        setUploadingAvatar(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error handling avatar:', error);
+      alert(error?.message || (i18n.language === 'he' ? 'שגיאה בהעלאת תמונה' : 'Error uploading image'));
+      setAvatarFile(null);
+      setAvatarPreview(contact?.avatar_url || null);
     } finally {
       setUploadingAvatar(false);
     }

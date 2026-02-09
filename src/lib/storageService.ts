@@ -17,10 +17,11 @@ export class StorageService {
         throw new Error('User not authenticated');
       }
 
-      // Create file path: avatars/{user_id}/{contact_id}/{timestamp}_{filename}
+      // Create file path: {user_id}/{contact_id}_{timestamp}.{ext}
+      // This matches the policy which checks foldername(name)[1] = user_id
       const fileExt = file.name.split('.').pop();
       const fileName = `${contactId}_${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${user.id}/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload file
       const { error: uploadError } = await supabase.storage
@@ -30,7 +31,13 @@ export class StorageService {
           upsert: false,
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        // Provide more helpful error messages
+        if (uploadError.message?.includes('new row violates row-level security policy')) {
+          throw new Error('Permission denied. Please check storage bucket policies are set up correctly.');
+        }
+        throw uploadError;
+      }
 
       // Get public URL
       const { data } = supabase.storage
@@ -38,7 +45,7 @@ export class StorageService {
         .getPublicUrl(filePath);
 
       return { url: data.publicUrl, error: null };
-    } catch (error) {
+    } catch (error: any) {
       return { url: null, error: error as Error };
     }
   }
@@ -53,10 +60,11 @@ export class StorageService {
         throw new Error('Supabase not configured');
       }
 
-      // Create file path: profiles/{user_id}/{timestamp}_{filename}
+      // Create file path: {user_id}/{timestamp}_{filename}
+      // This matches the policy which checks foldername(name)[1] = user_id
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}_${Date.now()}.${fileExt}`;
-      const filePath = `profiles/${fileName}`;
+      const filePath = `${userId}/${fileName}`;
 
       // Upload file
       const { error: uploadError } = await supabase.storage
