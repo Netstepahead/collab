@@ -35,7 +35,7 @@ export function Header() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b border-[#1B365D]/10 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
@@ -43,7 +43,7 @@ export function Header() {
             <img 
               src="/logo-step-ahead-dark.png" 
               alt="Network CRM" 
-              className="h-8 w-auto"
+              className="h-10 md:h-12 w-auto transition-all duration-300"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
@@ -56,16 +56,16 @@ export function Header() {
         <nav className="hidden md:flex items-center space-x-6">
           <Link
             href="/"
-            className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-              isActive('/') ? 'text-blue-600' : 'text-gray-700'
+            className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+              isActive('/') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
             }`}
           >
             {i18n.language === 'he' ? 'בית' : 'Home'}
           </Link>
           <Link
             href="/questionnaire"
-            className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-              isActive('/questionnaire') ? 'text-blue-600' : 'text-gray-700'
+            className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+              isActive('/questionnaire') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
             }`}
           >
             {i18n.language === 'he' ? 'שאלון' : 'Questionnaire'}
@@ -74,16 +74,16 @@ export function Header() {
             <>
               <Link
                 href="/contacts"
-                className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                  isActive('/contacts') ? 'text-blue-600' : 'text-gray-700'
+                className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+                  isActive('/contacts') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
                 }`}
               >
                 {i18n.language === 'he' ? 'קשרים' : 'Contacts'}
               </Link>
               <Link
                 href="/dashboard"
-                className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                  isActive('/dashboard') ? 'text-blue-600' : 'text-gray-700'
+                className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+                  isActive('/dashboard') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
                 }`}
               >
                 {i18n.language === 'he' ? 'לוח בקרה' : 'Dashboard'}
@@ -98,6 +98,7 @@ export function Header() {
             variant="outline"
             size="sm"
             onClick={toggleLanguage}
+            className="border-[#1B365D]/20 text-[#1B365D] hover:bg-[#1B365D]/5 transition-smooth"
           >
             {i18n.language === 'en' ? 'עברית' : 'English'}
           </Button>
@@ -106,18 +107,28 @@ export function Header() {
           {isSupabaseConfigured() && (
             <>
               {loading ? (
-                <div className="w-16 h-8 bg-gray-100 animate-pulse rounded" />
+                <div className="w-16 h-8 bg-gray-100 animate-pulse rounded-lg" />
               ) : user ? (
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600 hidden sm:inline">
                     {user.email}
                   </span>
-                  <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleSignOut}
+                    className="text-[#1B365D] hover:bg-[#1B365D]/5"
+                  >
                     {i18n.language === 'he' ? 'התנתק' : 'Sign Out'}
                   </Button>
                 </div>
               ) : (
-                <Button variant="default" size="sm" onClick={() => router.push('/auth')}>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => router.push('/auth')}
+                  className="bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg"
+                >
                   {i18n.language === 'he' ? 'התחבר' : 'Sign In'}
                 </Button>
               )}
