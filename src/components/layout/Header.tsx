@@ -104,6 +104,14 @@ export function Header() {
               >
                 {i18n.language === 'he' ? 'פרופיל' : 'Profile'}
               </Link>
+              <Link
+                href="/settings/integrations"
+                className={`text-sm font-medium transition-colors duration-300 hover:text-[#E87722] ${
+                  isActive('/settings/integrations') ? 'text-[#E87722] font-semibold' : 'text-[#1B365D]'
+                }`}
+              >
+                {i18n.language === 'he' ? 'אינטגרציות' : 'Integrations'}
+              </Link>
             </>
           )}
         </nav>

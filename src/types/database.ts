@@ -157,6 +157,73 @@ export interface Database {
           notes?: string | null
         }
       }
+      integrations: {
+        Row: {
+          id: string
+          user_id: string
+          provider: string
+          access_token: string
+          refresh_token: string | null
+          expires_at: string | null
+          enabled: boolean
+          last_sync_at: string | null
+          sync_settings: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: string
+          access_token: string
+          refresh_token?: string | null
+          expires_at?: string | null
+          enabled?: boolean
+          last_sync_at?: string | null
+          sync_settings?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: string
+          access_token?: string
+          refresh_token?: string | null
+          expires_at?: string | null
+          enabled?: boolean
+          last_sync_at?: string | null
+          sync_settings?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      interaction_sources: {
+        Row: {
+          id: string
+          interaction_id: string
+          source_type: string
+          source_id: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          interaction_id: string
+          source_type: string
+          source_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          interaction_id?: string
+          source_type?: string
+          source_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
