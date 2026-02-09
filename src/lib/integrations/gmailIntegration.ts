@@ -57,9 +57,9 @@ export class GmailIntegration {
       process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/integrations/gmail/callback`
     );
 
+    // gmail.readonly already includes metadata access and supports query parameters
     const scopes = [
       'https://www.googleapis.com/auth/gmail.readonly',
-      'https://www.googleapis.com/auth/gmail.metadata',
     ];
 
     return oauth2Client.generateAuthUrl({
