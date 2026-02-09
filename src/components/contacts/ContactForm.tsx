@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,9 @@ interface ContactFormProps {
 
 export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactFormProps) {
   const { i18n } = useTranslation();
-  const [formData, setFormData] = useState<ContactFormData>({
+  
+  // Initialize form data based on contact prop
+  const getInitialFormData = (): ContactFormData => ({
     full_name: contact?.full_name || '',
     email: contact?.email || '',
     phone: contact?.phone || '',
@@ -31,6 +33,13 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
     tags: contact?.tags || [],
     common_ground: contact?.common_ground || '',
   });
+
+  const [formData, setFormData] = useState<ContactFormData>(getInitialFormData());
+
+  // Reset form when contact changes (switching between add/edit modes)
+  useEffect(() => {
+    setFormData(getInitialFormData());
+  }, [contact?.id]); // Reset when contact ID changes (or becomes undefined for new contact)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,7 +200,7 @@ export function ContactForm({ contact, onSubmit, onCancel, isLoading }: ContactF
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          className="bg-[#1B365D] hover:bg-[#2a4d80] text-white transition-smooth hover:shadow-lg"
         >
           {isLoading
             ? (i18n.language === 'he' ? 'שומר...' : 'Saving...')

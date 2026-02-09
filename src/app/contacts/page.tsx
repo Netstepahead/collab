@@ -275,7 +275,13 @@ export default function ContactsPage() {
       </div>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          // Reset editing contact when dialog closes
+          setEditingContact(null);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-[#1B365D]/10">
           <DialogHeader>
             <DialogTitle className="font-serif text-[#1B365D]">
@@ -290,6 +296,7 @@ export default function ContactsPage() {
             </DialogDescription>
           </DialogHeader>
           <ContactForm
+            key={editingContact?.id || 'new'} // Force remount when switching between add/edit
             contact={editingContact}
             onSubmit={handleSubmit}
             onCancel={() => {
