@@ -47,21 +47,50 @@ Once your project is created and selected:
 
 ## Step 2: Configure OAuth Consent Screen
 
-1. Go to "APIs & Services" > "OAuth consent screen"
-2. **Choose "Internal"** (since you're using Google Workspace)
+### Navigate to OAuth Consent Screen
+
+**Important**: You need to go to the **OAuth Consent Screen**, NOT the "OAuth Overview" page you might see.
+
+1. In the left sidebar, look for **"APIs & Services"** (or click the hamburger menu ☰ if you don't see it)
+2. Click **"APIs & Services"** > **"OAuth consent screen"**
+   - Direct link: https://console.cloud.google.com/apis/credentials/consent
+   - Or navigate: Hamburger menu ☰ > APIs & Services > OAuth consent screen
+
+### Configure the Consent Screen
+
+1. **Choose User Type**:
+   - **Select "Internal"** (since you're using Google Workspace)
+   - Click **"CREATE"**
    - **Internal** = Only users in your Google Workspace organization can use the app
    - **External** = Anyone with a Google account can use it (requires verification for production)
-   - For Google Workspace, "Internal" is recommended for security
-3. Fill in required information:
-   - App name: "Step Ahead CRM"
-   - User support email: Your Workspace admin email
-   - Developer contact email: Your email
-   - App logo (optional)
-4. Add scopes:
-   - `https://www.googleapis.com/auth/gmail.readonly`
-   - `https://www.googleapis.com/auth/gmail.metadata`
-5. **No test users needed** for Internal apps (all Workspace users can access)
-6. Save and continue
+
+2. **Fill in App Information** (Step 1 of 4):
+   - **App name**: `Step Ahead CRM`
+   - **User support email**: Select your Workspace admin email from dropdown
+   - **Developer contact email**: Your email address
+   - **App logo**: (Optional - skip for now)
+   - Click **"SAVE AND CONTINUE"**
+
+3. **Add Scopes** (Step 2 of 4) - THIS IS WHERE YOU ADD SCOPES:
+   - You'll see a page titled "Scopes"
+   - Click **"ADD OR REMOVE SCOPES"** button
+   - A popup window will appear with a search box
+   - **Search for "Gmail"** in the search box
+   - Check the boxes for these two scopes:
+     - ✅ `https://www.googleapis.com/auth/gmail.readonly`
+     - ✅ `https://www.googleapis.com/auth/gmail.metadata`
+   - Click **"UPDATE"** at the bottom
+   - Click **"SAVE AND CONTINUE"** on the main page
+
+4. **Test Users** (Step 3 of 4):
+   - For Internal apps, you can skip this step
+   - Click **"SAVE AND CONTINUE"**
+
+5. **Summary** (Step 4 of 4):
+   - Review your settings
+   - Click **"BACK TO DASHBOARD"**
+
+**Note**: If you don't see the "Add scopes" section, make sure you completed Step 1 (App Information) first. The scopes step comes after you save the app information.
 
 ## Step 3: Create OAuth 2.0 Credentials
 
