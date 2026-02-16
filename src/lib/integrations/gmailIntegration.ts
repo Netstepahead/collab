@@ -211,35 +211,47 @@ export class GmailIntegration {
     return matches ? matches.map(email => email.toLowerCase()) : [];
   }
 
-  // Match email to contact (use authClient when called from API route for RLS)
+  // Match email to contact (use authClient when client-side, or preFetchedContacts when from API route)
   static async matchEmailToContact(
     email: string,
     userId: string,
-    authClient?: SupabaseClient<Database>
+    authClient?: SupabaseClient<Database>,
+    preFetchedContacts?: { id: string; email: string | null }[]
   ): Promise<string | null> {
     if (!isSupabaseConfigured()) {
       return null;
     }
 
-    const client = authClient ?? supabase;
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log(`[Gmail Sync] Matching email: ${normalizedEmail}`);
 
-    try {
-      const normalizedEmail = email.toLowerCase().trim();
-      console.log(`[Gmail Sync] Matching email: ${normalizedEmail}`);
+    let contacts: { id: string; email: string | null }[];
 
-      // Get all contacts with emails for this user
-      const { data: contacts, error: contactsError } = await client
-        .from('contacts')
-        .select('id, email')
-        .eq('user_id', userId)
-        .not('email', 'is', null);
+    if (preFetchedContacts && preFetchedContacts.length > 0) {
+      contacts = preFetchedContacts.filter((c) => c.email != null && c.email.trim() !== '');
+      console.log(`[Gmail Sync] Using ${contacts.length} pre-fetched contacts with emails`);
+    } else {
+      const client = authClient ?? supabase;
+      try {
+        const { data, error: contactsError } = await client
+          .from('contacts')
+          .select('id, email')
+          .eq('user_id', userId)
+          .not('email', 'is', null);
 
-      if (contactsError) {
-        console.error('[Gmail Sync] Error fetching contacts:', contactsError);
+        if (contactsError) {
+          console.error('[Gmail Sync] Error fetching contacts:', contactsError);
+          return null;
+        }
+        contacts = data ?? [];
+      } catch (e) {
+        console.error('[Gmail Sync] Error fetching contacts:', e);
         return null;
       }
+    }
 
-      if (!contacts || contacts.length === 0) {
+    try {
+      if (contacts.length === 0) {
         console.log('[Gmail Sync] No contacts with email addresses found');
         return null;
       }
@@ -282,11 +294,28 @@ export class GmailIntegration {
     }
   }
 
-  // Sync emails and create interactions (authClient required when called from API route for RLS)
+  /** Fetch contacts for a user (call from API route with service role client to bypass RLS) */
+  static async fetchContactsForUser(
+    client: SupabaseClient<Database>,
+    userId: string
+  ): Promise<{ id: string; email: string | null }[]> {
+    const { data, error } = await client
+      .from('contacts')
+      .select('id, email')
+      .eq('user_id', userId);
+    if (error) {
+      console.error('[Gmail Sync] Error fetching contacts for user:', error);
+      return [];
+    }
+    return data ?? [];
+  }
+
+  // Sync emails and create interactions (authClient for inserts; preFetchedContacts when anon client can't read contacts due to RLS)
   async syncEmails(
     userId: string,
     lastSyncAt?: Date,
-    authClient?: SupabaseClient<Database>
+    authClient?: SupabaseClient<Database>,
+    preFetchedContacts?: { id: string; email: string | null }[]
   ): Promise<{ synced: number; errors: number; totalEmails: number; matchedContacts: number; skippedNoContact: number }> {
     let synced = 0;
     let errors = 0;
@@ -317,8 +346,8 @@ export class GmailIntegration {
           
           console.log(`[Gmail Sync] Processing email: ${isSent ? 'SENT' : 'RECEIVED'} from/to ${otherPartyEmail}`);
 
-          // Match to contact (pass auth client so RLS allows reading contacts)
-          const contactId = await GmailIntegration.matchEmailToContact(otherPartyEmail, userId, client);
+          // Match to contact (use pre-fetched contacts from service role when provided, else auth client)
+          const contactId = await GmailIntegration.matchEmailToContact(otherPartyEmail, userId, client, preFetchedContacts);
           
           if (!contactId) {
             skippedNoContact++;

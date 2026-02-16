@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+
     // Get Gmail integration using the authenticated client
     // Query directly to avoid RLS issues
     const { data: integration, error: integrationError } = await supabase
@@ -85,8 +86,33 @@ export async function POST(request: NextRequest) {
       ? new Date(integration.last_sync_at)
       : undefined;
 
-    // Sync emails
-    const { synced, errors, totalEmails, matchedContacts, skippedNoContact } = await gmailIntegration.syncEmails(user.id, lastSyncAt);
+    // Log first so we can confirm this code path is deployed (must appear before "Fetching emails")
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const hasServiceRole = Boolean(serviceRoleKey && serviceRoleKey.length > 20 && !serviceRoleKey.includes('your-service-role'));
+    console.log(`[Gmail Sync] START user=${user.id} serviceRole=${hasServiceRole ? 'yes' : 'no'}`);
+
+    let contactsForUser: { id: string; email: string | null }[] = [];
+    if (supabaseUrl && hasServiceRole && serviceRoleKey) {
+      try {
+        const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        contactsForUser = await GmailIntegration.fetchContactsForUser(adminClient, user.id);
+        console.log(`[Gmail Sync] Pre-fetched ${contactsForUser.length} contacts`);
+      } catch (err) {
+        console.error('[Gmail Sync] Error fetching contacts with service role:', err);
+      }
+    } else {
+      console.log(`[Gmail Sync] Pre-fetch skipped (no service role key)`);
+    }
+
+    // Sync emails (pass auth client for inserts; pre-fetched contacts for matching)
+    const { synced, errors, totalEmails, matchedContacts, skippedNoContact } = await gmailIntegration.syncEmails(
+      user.id,
+      lastSyncAt,
+      supabase,
+      contactsForUser.length > 0 ? contactsForUser : undefined
+    );
 
     // Update last sync time using authenticated client
     await supabase

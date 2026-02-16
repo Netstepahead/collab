@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { parseCSV, parseExcel, mapColumnsToContacts, autoDetectMapping, type ImportRow, type ColumnMapping, type ParsedContact } from '@/lib/csvImport';
+import { downloadTemplate } from '@/lib/templateGenerator';
 import type { ContactFormData } from '@/types/contact';
+import { Download } from 'lucide-react';
 
 interface ImportDialogProps {
   open: boolean;
@@ -158,6 +160,35 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
 
         {step === 'upload' && (
           <div className="space-y-4">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 mb-3">
+                {i18n.language === 'he'
+                  ? 'לפני הייבוא, הורד תבנית לדוגמה כדי לראות את הפורמט הנדרש:'
+                  : 'Before importing, download a template to see the required format:'}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadTemplate('csv')}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  {i18n.language === 'he' ? 'הורד תבנית CSV' : 'Download CSV Template'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadTemplate('xlsx')}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  {i18n.language === 'he' ? 'הורד תבנית Excel' : 'Download Excel Template'}
+                </Button>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="file-upload">
                 {i18n.language === 'he' ? 'בחר קובץ' : 'Select File'}
@@ -193,7 +224,7 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
                 ? 'מפה את העמודות מהקובץ לשדות הקשר:'
                 : 'Map columns from file to contact fields:'}
             </p>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{i18n.language === 'he' ? 'שם מלא *' : 'Full Name *'}</Label>
@@ -259,6 +290,114 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
                   <Select
                     value={mapping.company || ''}
                     onValueChange={(value) => handleMappingChange('company', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={i18n.language === 'he' ? 'אופציונלי' : 'Optional'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{i18n.language === 'he' ? 'ללא' : 'None'}</SelectItem>
+                      {headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{i18n.language === 'he' ? 'תפקיד' : 'Job Title'}</Label>
+                  <Select
+                    value={mapping.job_title || ''}
+                    onValueChange={(value) => handleMappingChange('job_title', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={i18n.language === 'he' ? 'אופציונלי' : 'Optional'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{i18n.language === 'he' ? 'ללא' : 'None'}</SelectItem>
+                      {headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{i18n.language === 'he' ? 'סוג קשר' : 'Relationship Type'}</Label>
+                  <Select
+                    value={mapping.relationship_type || ''}
+                    onValueChange={(value) => handleMappingChange('relationship_type', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={i18n.language === 'he' ? 'אופציונלי' : 'Optional'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{i18n.language === 'he' ? 'ללא' : 'None'}</SelectItem>
+                      {headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">
+                    {i18n.language === 'he'
+                      ? 'ערכים תקפים: professional, personal, family, other'
+                      : 'Valid values: professional, personal, family, other'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{i18n.language === 'he' ? 'חוזק קשר' : 'Connection Strength'}</Label>
+                  <Select
+                    value={mapping.connection_strength || ''}
+                    onValueChange={(value) => handleMappingChange('connection_strength', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={i18n.language === 'he' ? 'אופציונלי' : 'Optional'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{i18n.language === 'he' ? 'ללא' : 'None'}</SelectItem>
+                      {headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">
+                    {i18n.language === 'he' ? 'מספר בין 1-5' : 'Number between 1-5'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{i18n.language === 'he' ? 'קרקע משותפת' : 'Common Ground'}</Label>
+                  <Select
+                    value={mapping.common_ground || ''}
+                    onValueChange={(value) => handleMappingChange('common_ground', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={i18n.language === 'he' ? 'אופציונלי' : 'Optional'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{i18n.language === 'he' ? 'ללא' : 'None'}</SelectItem>
+                      {headers.map((header) => (
+                        <SelectItem key={header} value={header}>
+                          {header}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{i18n.language === 'he' ? 'הערות' : 'Notes'}</Label>
+                  <Select
+                    value={mapping.notes || ''}
+                    onValueChange={(value) => handleMappingChange('notes', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={i18n.language === 'he' ? 'אופציונלי' : 'Optional'} />
