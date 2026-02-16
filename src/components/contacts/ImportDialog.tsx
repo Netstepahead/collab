@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -27,6 +27,19 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
   const [step, setStep] = useState<'upload' | 'map' | 'preview'>('upload');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Reset to upload step when dialog opens
+  useEffect(() => {
+    if (open) {
+      setStep('upload');
+      setFile(null);
+      setRows([]);
+      setHeaders([]);
+      setMapping({});
+      setParsedContacts([]);
+      setError('');
+    }
+  }, [open]);
 
   const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
